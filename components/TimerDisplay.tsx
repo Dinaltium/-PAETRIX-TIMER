@@ -17,7 +17,7 @@ interface TimerDisplayProps {
 
 const Digit = ({ value, color = "white", label }: { value: string; color?: "white" | "red"; label?: string }) => {
   return (
-    <div className="flex flex-col items-center" style={{ width: '45rem' }}>
+    <div className="flex flex-col items-center" style={{ width: '25vw' }}>
       <div className="relative py-12 md:py-20 overflow-visible flex items-center justify-center w-full">
         <motion.div
           key={value}
@@ -26,7 +26,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
           exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={cn(
-            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-none tracking-tighter tabular-nums select-none text-center w-full",
+            "text-[8rem] md:text-[12rem] lg:text-[18rem] font-black leading-none tracking-tighter tabular-nums select-none text-center w-full",
             color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_120px_rgba(255,59,48,0.6)]"
           )}
         >
@@ -34,7 +34,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
         </motion.div>
       </div>
       {label && (
-        <span className="text-[10px] md:text-xs uppercase tracking-[0.6em] text-neutral-500 font-black mt-8 md:mt-12 block w-full text-center">
+        <span className="text-[10px] md:text-xs uppercase tracking-[0.6em] text-neutral-500 font-black mt-4 md:mt-8 block w-full text-center">
           {label}
         </span>
       )}
@@ -48,7 +48,7 @@ const Separator = ({ color = "red" }: { color?: "white" | "red" }) => (
       "flex items-center justify-center opacity-20 select-none",
       color === "white" ? "text-white" : "text-[#FF3B30]"
     )}
-    style={{ width: '10rem', fontSize: '10rem' }}
+    style={{ width: '5vw', fontSize: '10rem' }}
   >
     <span style={{ marginTop: '-4rem' }}>:</span>
   </div>
