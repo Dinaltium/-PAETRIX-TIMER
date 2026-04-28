@@ -442,11 +442,3 @@ export const Controls: React.FC<ControlsProps> = (props) => {
     </>
   );
 };
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-};
