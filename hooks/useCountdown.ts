@@ -116,12 +116,11 @@ export function useCountdown() {
     }
   }, [isMuted]);
 
+  const lastPlayedRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (!isActive || remainingTime <= 0) {
       if (timerRef.current) cancelAnimationFrame(timerRef.current);
-      if (remainingTime === 0 && isActive) {
-        playSound(alertSound);
-      }
       return;
     }
 
@@ -144,16 +143,19 @@ export function useCountdown() {
             playSound(activeTrigger.soundUrl);
           }
 
-          persistState(STORAGE_KEYS.REMAINING_TIME, next);
-          persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
-          if (next === 0) {
+          // Check for finish
+          if (next === 0 && lastPlayedRef.current !== 0) {
+            playSound(alertSound);
+            lastPlayedRef.current = 0;
             setIsActive(false);
             persistState(STORAGE_KEYS.IS_ACTIVE, false);
           }
+
+          persistState(STORAGE_KEYS.REMAINING_TIME, next);
+          persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
           return next;
         });
         
-        // Schedule next tick based on drift
         expectedTimeRef.current += 1000;
         const nextInterval = Math.max(0, 1000 - drift);
         timerRef.current = window.setTimeout(() => {

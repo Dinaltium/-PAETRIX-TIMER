@@ -315,7 +315,14 @@ export const Controls: React.FC<ControlsProps> = (props) => {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '48px' }}>
-                <h2 style={{ color: '#fff', fontSize: '32px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px' }}>Settings</h2>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
+                  <h2 style={{ color: '#fff', fontSize: '32px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px' }}>Settings</h2>
+                  {props.isActive && (
+                    <div style={{ color: '#FF3B30', fontFamily: 'var(--font-orbitron), monospace', fontSize: '18px', fontWeight: '900', letterSpacing: '1px' }}>
+                      {formatTime(props.remainingTime).hh}:{formatTime(props.remainingTime).mm}:{formatTime(props.remainingTime).ss}
+                    </div>
+                  )}
+                </div>
                 <button onClick={() => setIsSettingsOpen(false)} style={{ width: '48px', height: '48px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <X size={24} />
                 </button>
