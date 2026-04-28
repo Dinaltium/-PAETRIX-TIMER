@@ -7,6 +7,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSecondsFromHHMMSS, formatTime, loadState, persistState } from "@/utils/time";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 interface ControlsProps {
   isActive: boolean;
