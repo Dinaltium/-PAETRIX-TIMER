@@ -317,6 +317,6 @@ export const Controls: React.FC<ControlsProps> = ({
       <div className="absolute bottom-6 text-neutral-800 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
         <ChevronUp size={32} />
       </div>
-    </motion.div>
+    </div>
   );
 };
