@@ -428,7 +428,41 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                             </div>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                              <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Select Sound</div>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Select Sound</div>
+                                <label style={{ fontSize: '9px', color: '#FF3B30', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <Plus size={10} /> Upload File
+                                  <input 
+                                    type="file" 
+                                    accept="audio/*"
+                                    style={{ display: 'none' }}
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      
+                                      const formData = new FormData();
+                                      formData.append('file', file);
+                                      
+                                      try {
+                                        const res = await fetch('/api/upload', {
+                                          method: 'POST',
+                                          body: formData
+                                        });
+                                        const data = await res.json();
+                                        if (data.success) {
+                                          await fetchLocalSounds();
+                                          setTriggerSound(`/alerts/${file.name}`);
+                                          alert(`Uploaded ${file.name} successfully!`);
+                                        } else {
+                                          alert(data.error || "Upload failed");
+                                        }
+                                      } catch (err) {
+                                        alert("Upload failed. Check console for details.");
+                                      }
+                                    }}
+                                  />
+                                </label>
+                              </div>
                               <select 
                                 value={triggerSound}
                                 onChange={(e) => setTriggerSound(e.target.value)}
