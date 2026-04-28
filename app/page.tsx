@@ -148,12 +148,22 @@ export default function Home() {
         <TimerDisplay remainingTime={remainingTime} isActive={isActive} />
       </div>
 
+      {/* PA College of Engineering Branding */}
+      <div className="fixed bottom-16 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-4 opacity-30 hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+        <img src="/Pace-logo.png" alt="PACE Logo" className="h-16 md:h-20 w-auto object-contain" />
+        <div className="flex items-center gap-4">
+          <div className="w-8 h-[1px] bg-white/10" />
+          <h2 className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.5em] font-light">PA College of Engineering</h2>
+          <div className="w-8 h-[1px] bg-white/10" />
+        </div>
+      </div>
+
       {/* Sponsor Logo Slot */}
-      <div className="absolute bottom-12 right-12 z-10 opacity-30 hover:opacity-100 transition-opacity duration-500">
+      <div className="absolute bottom-12 right-12 z-10 opacity-20 hover:opacity-100 transition-opacity duration-500">
         <div className="flex flex-col items-end gap-2">
-          <span className="text-[10px] uppercase tracking-normal text-neutral-500">Powered by</span>
-          <div className="w-36 h-12 border border-neutral-800 rounded-lg flex items-center justify-center bg-neutral-900/50 backdrop-blur-sm">
-            <span className="text-white font-black italic tracking-normal text-lg">PÆTRIX</span>
+          <span className="text-[10px] uppercase tracking-normal text-neutral-500">System by</span>
+          <div className="px-4 h-10 border border-neutral-800 rounded-lg flex items-center justify-center bg-neutral-900/50 backdrop-blur-sm">
+            <span className="text-white font-black italic tracking-normal text-sm">PÆTRIX</span>
           </div>
         </div>
       </div>
