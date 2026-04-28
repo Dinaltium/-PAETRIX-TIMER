@@ -206,7 +206,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsSettingsOpen(false)}
-              style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.95)', backdropFilter: 'blur(20px)' }}
+              style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.95)', backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)' }}
             />
             
             <motion.div
@@ -215,67 +215,79 @@ export const Controls: React.FC<ControlsProps> = (props) => {
               exit={{ scale: 0.9, opacity: 0 }}
               style={{
                 position: 'relative',
-                backgroundColor: '#0a0a0a',
+                backgroundColor: 'rgba(10, 10, 10, 0.95)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '48px',
-                padding: '64px',
+                borderRadius: '40px',
+                padding: '48px',
                 width: '100%',
-                maxWidth: '900px',
-                boxShadow: '0 50px 100px -20px rgba(0, 0, 0, 1)'
+                maxWidth: '850px',
+                boxShadow: '0 100px 200px -50px rgba(0, 0, 0, 1)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', marginBottom: '64px' }}>
-                <div style={{ flex: 1 }}>
-                  <h2 style={{ color: '#fff', fontSize: '56px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-3px' }}>Settings</h2>
-                </div>
-                <button onClick={() => setIsSettingsOpen(false)} style={{ width: '64px', height: '64px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer' }}>
-                  <X size={32} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '48px' }}>
+                <h2 style={{ color: '#fff', fontSize: '32px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px' }}>Settings</h2>
+                <button onClick={() => setIsSettingsOpen(false)} style={{ width: '48px', height: '48px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <X size={24} />
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '64px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <h3 style={{ fontSize: '12px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Presets</h3>
-                  {presets.map((p, i) => (
-                    <button
-                      key={i}
-                      onClick={() => { props.setTime(p.seconds); setIsSettingsOpen(false); }}
-                      style={{ padding: '32px', textAlign: 'left', backgroundColor: '#111', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '24px', color: '#fff', cursor: 'pointer' }}
-                    >
-                      <div style={{ fontSize: '10px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>{p.name}</div>
-                      <div style={{ fontSize: '28px', fontWeight: '900', fontFamily: 'monospace', marginTop: '8px' }}>
-                        {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
-                      </div>
-                    </button>
-                  ))}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '48px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '8px' }}>Presets</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {presets.map((p, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { props.setTime(p.seconds); setIsSettingsOpen(false); }}
+                        style={{ padding: '24px', textAlign: 'left', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '20px', color: '#fff', cursor: 'pointer', transition: 'all 0.2s' }}
+                      >
+                        <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>{p.name}</div>
+                        <div style={{ fontSize: '20px', fontWeight: '900', fontFamily: 'monospace', marginTop: '4px' }}>
+                          {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                  <h3 style={{ fontSize: '12px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Custom</h3>
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    <TimePickerUnit label="HH" value={inputH} max={99} onChange={setInputH} />
-                    <TimePickerUnit label="MM" value={inputM} max={59} onChange={setInputM} />
-                    <TimePickerUnit label="SS" value={inputS} max={59} onChange={setInputS} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Custom Node</h3>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <TimePickerUnit label="HH" value={inputH} max={99} onChange={setInputH} />
+                      <TimePickerUnit label="MM" value={inputM} max={59} onChange={setInputM} />
+                      <TimePickerUnit label="SS" value={inputS} max={59} onChange={setInputS} />
+                    </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '16px' }}>
-                    <button 
-                      onClick={() => { props.setTime(getSecondsFromHHMMSS(inputH, inputM, inputS)); setIsSettingsOpen(false); }}
-                      style={{ flex: 1, padding: '32px', backgroundColor: '#fff', color: '#000', borderRadius: '24px', border: 'none', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '18px', cursor: 'pointer' }}
-                    >
-                      Apply
-                    </button>
-                    <button 
-                      onClick={() => {
-                        const total = getSecondsFromHHMMSS(inputH, inputM, inputS);
-                        const newPresets = [...presets, { name: inputName, seconds: total }];
-                        setPresets(newPresets);
-                        persistState("timer_presets", newPresets);
-                      }}
-                      style={{ width: '96px', height: '96px', backgroundColor: '#1a1a1a', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '24px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                      <Plus size={40} />
-                    </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <input 
+                      type="text" 
+                      value={inputName}
+                      onChange={(e) => setInputName(e.target.value)}
+                      style={{ width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}
+                      placeholder="PRESET NAME"
+                    />
+
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button 
+                        onClick={() => { props.setTime(getSecondsFromHHMMSS(inputH, inputM, inputS)); setIsSettingsOpen(false); }}
+                        style={{ flex: 1, height: '64px', backgroundColor: '#fff', color: '#000', borderRadius: '16px', border: 'none', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
+                      >
+                        Apply Time
+                      </button>
+                      <button 
+                        onClick={() => {
+                          const total = getSecondsFromHHMMSS(inputH, inputM, inputS);
+                          const newPresets = [...presets, { name: inputName, seconds: total }];
+                          setPresets(newPresets);
+                          persistState("timer_presets", newPresets);
+                        }}
+                        style={{ width: '64px', height: '64px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
+                        <Plus size={24} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
