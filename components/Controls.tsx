@@ -61,11 +61,11 @@ const TimePickerUnit = ({
 };
 
 export const Controls: React.FC<ControlsProps> = (props) => {
-  const [isVisible, setIsVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [presets, setPresets] = useState<{name: string, seconds: number}[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -78,22 +78,8 @@ export const Controls: React.FC<ControlsProps> = (props) => {
 
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
-    
-    let hideTimeout: any;
-    const handleMove = () => {
-      setIsVisible(true);
-      clearTimeout(hideTimeout);
-      hideTimeout = setTimeout(() => {
-        if (!isSettingsOpen) setIsVisible(false);
-      }, 4000);
-    };
-
-    window.addEventListener("mousemove", handleMove);
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      window.removeEventListener("mousemove", handleMove);
-    };
-  }, [isSettingsOpen]);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   const { h, m, s } = formatTime(props.initialTime);
   const [inputH, setInputH] = useState(h);
@@ -108,111 +94,113 @@ export const Controls: React.FC<ControlsProps> = (props) => {
 
   if (!isMounted) return null;
 
+  const showPanel = isHovered || isSettingsOpen;
+
   return (
     <>
-      {/* 2ND SS RESTORATION: Chunky, Bold, Rounded-Rectangle UI */}
-      <div style={{
-        position: 'fixed',
-        bottom: '60px',
-        left: '50%',
-        transform: `translateX(-50%) translateY(${isVisible || isSettingsOpen ? '0' : '120px'})`,
-        opacity: isVisible || isSettingsOpen ? 1 : 0,
-        backgroundColor: '#111111',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
-        borderRadius: '32px',
-        padding: '16px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '24px',
-        zIndex: 1000,
-        transition: 'all 0.5s cubic-bezier(0.2, 0, 0, 1)',
-        boxShadow: '0 40px 80px -20px rgba(0, 0, 0, 0.8)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button 
-            onClick={props.isActive ? props.pause : props.start}
-            style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '2px solid rgba(255, 255, 255, 0.1)',
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            {props.isActive ? (
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <div style={{ width: '6px', height: '24px', backgroundColor: '#fff', borderRadius: '2px' }} />
-                <div style={{ width: '6px', height: '24px', backgroundColor: '#fff', borderRadius: '2px' }} />
-              </div>
-            ) : (
-              <Play size={32} fill="currentColor" />
-            )}
-          </button>
-          
-          <button 
-            onClick={props.reset}
-            style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}
-          >
-            <RotateCcw size={32} />
-          </button>
-        </div>
+      {/* 
+          TRIGGER ZONE 
+          Fixed at the bottom, 160px tall.
+          This ensures the mouse has to be in the "bottom area" to trigger the UI.
+      */}
+      <div 
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '160px',
+          zIndex: 900,
+          backgroundColor: 'transparent',
+          pointerEvents: 'auto'
+        }}
+      >
+        {/* The Controls Panel - Perfectly Restored Design */}
+        <div style={{
+          position: 'absolute',
+          bottom: '60px',
+          left: '50%',
+          transform: `translateX(-50%) translateY(${showPanel ? '0' : '120px'})`,
+          opacity: showPanel ? 1 : 0,
+          backgroundColor: '#111111',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          borderRadius: '32px',
+          padding: '16px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '24px',
+          transition: 'all 0.5s cubic-bezier(0.2, 0, 0, 1)',
+          boxShadow: '0 40px 80px -20px rgba(0, 0, 0, 0.8)',
+          pointerEvents: showPanel ? 'auto' : 'none'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button 
+              onClick={props.isActive ? props.pause : props.start}
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '2px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              {props.isActive ? (
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <div style={{ width: '6px', height: '24px', backgroundColor: '#fff', borderRadius: '2px' }} />
+                  <div style={{ width: '6px', height: '24px', backgroundColor: '#fff', borderRadius: '2px' }} />
+                </div>
+              ) : (
+                <Play size={32} fill="currentColor" />
+              )}
+            </button>
+            
+            <button onClick={props.reset} style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}>
+              <RotateCcw size={32} />
+            </button>
+          </div>
 
-        <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }} />
+          <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }} />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button 
-            onClick={props.toggleMute}
-            style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}
-          >
-            {props.isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
-          </button>
-          
-          <button 
-            onClick={toggleFullscreen}
-            style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}
-          >
-            {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button onClick={props.toggleMute} style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}>
+              {props.isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
+            </button>
+            <button onClick={toggleFullscreen} style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}>
+              {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
+            </button>
 
-          <button 
-            onClick={() => setIsSettingsOpen(true)}
-            style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(220, 38, 38, 0.05)',
-              border: '2px solid rgba(220, 38, 38, 0.1)',
-              color: '#dc2626',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-          >
-            <Settings size={32} />
-          </button>
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(220, 38, 38, 0.05)',
+                border: '2px solid rgba(220, 38, 38, 0.1)',
+                color: '#dc2626',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              <Settings size={32} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Settings Modal - Also Chunky & Bold */}
+      {/* Settings Modal */}
       <AnimatePresence>
         {isSettingsOpen && (
-          <div style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 2000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '24px'
-          }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justify: 'center', padding: '24px' }}>
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -240,10 +228,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                 <div style={{ flex: 1 }}>
                   <h2 style={{ color: '#fff', fontSize: '56px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-3px' }}>Settings</h2>
                 </div>
-                <button 
-                  onClick={() => setIsSettingsOpen(false)}
-                  style={{ width: '64px', height: '64px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer' }}
-                >
+                <button onClick={() => setIsSettingsOpen(false)} style={{ width: '64px', height: '64px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer' }}>
                   <X size={32} />
                 </button>
               </div>
@@ -255,15 +240,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                     <button
                       key={i}
                       onClick={() => { props.setTime(p.seconds); setIsSettingsOpen(false); }}
-                      style={{
-                        padding: '32px',
-                        textAlign: 'left',
-                        backgroundColor: '#111',
-                        border: '1px solid rgba(255, 255, 255, 0.05)',
-                        borderRadius: '24px',
-                        color: '#fff',
-                        cursor: 'pointer'
-                      }}
+                      style={{ padding: '32px', textAlign: 'left', backgroundColor: '#111', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '24px', color: '#fff', cursor: 'pointer' }}
                     >
                       <div style={{ fontSize: '10px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>{p.name}</div>
                       <div style={{ fontSize: '28px', fontWeight: '900', fontFamily: 'monospace', marginTop: '8px' }}>
