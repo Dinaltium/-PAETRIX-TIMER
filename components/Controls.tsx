@@ -155,10 +155,18 @@ export const Controls: React.FC<ControlsProps> = (props) => {
     if (!url) return true;
     const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
     const isDrive = url.includes('drive.google.com');
+    const isMyInstantsPage = url.includes('myinstants.com') && !url.toLowerCase().endsWith('.mp3');
+
     if (isYouTube || isDrive) {
       alert("YouTube and Google Drive links are not direct audio files. Please use a direct link (ending in .mp3, .wav, etc.) or use one of the local assets.");
       return false;
     }
+
+    if (isMyInstantsPage) {
+      alert("Tip for MyInstants: Right-click the 'Download MP3' button on the MyInstants page and select 'Copy link address'. Paste THAT link here for it to work!");
+      return false;
+    }
+    
     return true;
   };
 
