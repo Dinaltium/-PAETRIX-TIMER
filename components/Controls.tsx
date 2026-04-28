@@ -7,12 +7,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSecondsFromHHMMSS, formatTime, loadState, persistState } from "@/utils/time";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 interface ControlsProps {
   isActive: boolean;
@@ -117,7 +111,6 @@ export const Controls: React.FC<ControlsProps> = ({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [presets, setPresets] = useState<{name: string, seconds: number}[]>([]);
-  // Robust visibility handling
   const [isMounted, setIsMounted] = useState(false);
   
   useEffect(() => {
@@ -169,166 +162,174 @@ export const Controls: React.FC<ControlsProps> = ({
     setIsSettingsOpen(false);
   };
 
+  if (!isMounted) return null;
+
   return (
-    <div 
-      className="fixed bottom-0 left-0 right-0 z-[100] h-48 flex flex-col items-center justify-end pb-10 group pointer-events-none"
-    >
-      {/* Interaction Trigger Zone */}
-      <div className="absolute inset-0 pointer-events-auto" />
-      
-      <div 
-        className={cn(
-          "pointer-events-auto bg-neutral-900/95 backdrop-blur-3xl border border-neutral-800 rounded-[2.5rem] p-6 flex items-center gap-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)] transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
-          (isVisible || isSettingsOpen) 
-            ? "translate-y-0 opacity-100 scale-100" 
-            : "translate-y-24 opacity-0 scale-95 group-hover:translate-y-0 group-hover:opacity-100 group-hover:scale-100"
-        )}
-      >
-        <div className="flex items-center gap-4">
-          {!isActive ? (
-            <button 
-              onClick={start}
-              className="p-6 bg-white text-black rounded-full hover:bg-neutral-200 transition-all hover:scale-110 active:scale-90 shadow-xl"
-            >
-              <Play size={32} fill="currentColor" />
-            </button>
-          ) : (
-            <button 
-              onClick={pause}
-              className="p-6 bg-neutral-800 text-white rounded-full hover:bg-neutral-700 transition-all hover:scale-110 active:scale-90 border border-neutral-700"
-            >
-              <Pause size={32} fill="currentColor" />
-            </button>
+    <>
+      <div className="fixed bottom-0 left-0 right-0 z-[100] pointer-events-none group">
+        {/* Invisible trigger area */}
+        <div 
+          className="absolute bottom-0 left-0 right-0 h-48 pointer-events-auto"
+          onMouseEnter={() => setIsVisible(true)}
+          onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
+        />
+
+        <div className="relative flex flex-col items-center justify-end pb-12 w-full h-48">
+          <AnimatePresence>
+            {isVisible && (
+              <motion.div
+                initial={{ y: 20, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 20, opacity: 0, scale: 0.95 }}
+                className="pointer-events-auto bg-neutral-900/95 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-6 flex items-center gap-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
+              >
+                <div className="flex items-center gap-4">
+                  {!isActive ? (
+                    <button 
+                      onClick={start}
+                      className="p-6 bg-white text-black rounded-full hover:bg-neutral-200 transition-all hover:scale-110 active:scale-90 shadow-xl"
+                    >
+                      <Play size={32} fill="currentColor" />
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={pause}
+                      className="p-6 bg-neutral-800 text-white rounded-full hover:bg-neutral-700 transition-all hover:scale-110 active:scale-90 border border-neutral-700"
+                    >
+                      <Pause size={32} fill="currentColor" />
+                    </button>
+                  )}
+                  <button 
+                    onClick={reset}
+                    className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all group/reset"
+                    title="Reset Timer"
+                  >
+                    <RotateCcw size={32} className="group-active/reset:rotate-[-180deg] transition-transform duration-500" />
+                  </button>
+                </div>
+
+                <div className="h-12 w-[1px] bg-neutral-800" />
+
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={toggleMute}
+                    className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all hover:scale-110"
+                  >
+                    {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
+                  </button>
+                  <button 
+                    onClick={toggleFullscreen}
+                    className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all hover:scale-110"
+                  >
+                    {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
+                  </button>
+                  <button 
+                    onClick={() => setIsSettingsOpen(true)}
+                    className="p-6 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all border border-red-600/20 hover:scale-110 shadow-lg shadow-red-600/10"
+                  >
+                    <Settings size={32} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {!isVisible && !isSettingsOpen && (
+            <div className="absolute bottom-6 flex flex-col items-center gap-2 opacity-20 transition-opacity">
+               <ChevronUp size={24} className="text-neutral-500 animate-bounce" />
+            </div>
           )}
-          <button 
-            onClick={reset}
-            className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all group/reset"
-            title="Reset Timer"
-          >
-            <RotateCcw size={32} className="group-active/reset:rotate-[-180deg] transition-transform duration-500" />
-          </button>
-        </div>
-
-        <div className="h-12 w-[1px] bg-neutral-800" />
-
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={toggleMute}
-            className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all hover:scale-110"
-          >
-            {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
-          </button>
-          <button 
-            onClick={toggleFullscreen}
-            className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all hover:scale-110"
-          >
-            {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
-          </button>
-          <button 
-            onClick={() => setIsSettingsOpen(true)}
-            className="p-6 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all border border-red-600/20 hover:scale-110 shadow-lg shadow-red-600/10"
-          >
-            <Settings size={32} />
-          </button>
         </div>
       </div>
 
-      {/* Indicator Chevron (only shows when panel is hidden) */}
-      <div 
-        className={cn(
-          "absolute bottom-4 text-neutral-800 transition-all duration-500 pointer-events-none group-hover:opacity-0",
-          (isVisible || isSettingsOpen) ? "opacity-0" : "opacity-100"
-        )}
-      >
-        <ChevronUp size={24} />
-      </div>
-
+      {/* Settings Modal - Centered Fixed */}
       <AnimatePresence>
         {isSettingsOpen && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
-            className="absolute bottom-28 bg-neutral-900 border border-neutral-800 rounded-3xl p-8 w-[450px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] backdrop-blur-xl"
-          >
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-2xl font-bold text-white tracking-tight">Configure Timers</h3>
-                <p className="text-neutral-500 text-sm mt-1">Select a preset or create a custom one.</p>
-              </div>
-              <button 
-                onClick={() => setIsSettingsOpen(false)}
-                className="p-2 text-neutral-500 hover:text-white transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              {/* Presets List */}
-              <div className="grid grid-cols-2 gap-3">
-                {presets.map((p, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { setTime(p.seconds); setIsSettingsOpen(false); }}
-                    className="p-3 text-left bg-neutral-800 hover:bg-neutral-700 rounded-xl transition-all border border-neutral-700/50 group"
-                  >
-                    <div className="text-xs text-neutral-500 uppercase tracking-normal group-hover:text-neutral-300 transition-colors">
-                      {p.name}
-                    </div>
-                    <div className="text-white font-mono mt-1">
-                      {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
-                    </div>
-                  </button>
-                ))}
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              onClick={() => setIsSettingsOpen(false)}
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-neutral-900 border border-neutral-800 rounded-[3rem] p-10 w-full max-w-[550px] shadow-[0_50px_100px_rgba(0,0,0,1)]"
+            >
+              <div className="flex items-center justify-between mb-10">
+                <div>
+                  <h3 className="text-3xl font-black text-white tracking-tight uppercase italic">Control Center</h3>
+                  <p className="text-neutral-500 text-sm mt-1">Configure your hackathon session presets.</p>
+                </div>
+                <button 
+                  onClick={() => setIsSettingsOpen(false)}
+                  className="p-3 bg-neutral-800 hover:bg-neutral-700 text-white rounded-full transition-all"
+                >
+                  <X size={24} />
+                </button>
               </div>
 
-              <div className="h-[1px] bg-neutral-800" />
-
-              {/* Custom Input */}
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-xs uppercase tracking-normal text-neutral-500 ml-1 font-bold">Timer Label</label>
-                  <input 
-                    type="text" 
-                    value={inputName}
-                    onChange={(e) => setInputName(e.target.value)}
-                    placeholder="e.g. Lunch Break"
-                    className="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all"
-                  />
+              <div className="space-y-10">
+                <div className="grid grid-cols-2 gap-4">
+                  {presets.map((p, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setTime(p.seconds); setIsSettingsOpen(false); }}
+                      className="p-5 text-left bg-neutral-800/50 hover:bg-neutral-800 rounded-2xl transition-all border border-neutral-700/30 group/item"
+                    >
+                      <div className="text-[10px] text-neutral-500 uppercase font-black tracking-widest group-hover/item:text-red-500 transition-colors">
+                        {p.name}
+                      </div>
+                      <div className="text-2xl text-white font-mono mt-1">
+                        {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
+                      </div>
+                    </button>
+                  ))}
                 </div>
 
-                <div className="flex gap-4">
-                  <TimePickerUnit label="H" value={inputH} max={99} onChange={setInputH} />
-                  <TimePickerUnit label="M" value={inputM} max={59} onChange={setInputM} />
-                  <TimePickerUnit label="S" value={inputS} max={59} onChange={setInputS} />
-                </div>
+                <div className="h-[1px] bg-neutral-800" />
 
-                <div className="flex gap-3 pt-2">
-                  <button 
-                    onClick={handleApplyTime}
-                    className="flex-1 py-4 bg-neutral-100 text-black font-bold rounded-xl hover:bg-white transition-all transform active:scale-[0.98]"
-                  >
-                    Set Once
-                  </button>
-                  <button 
-                    onClick={handleAddPreset}
-                    className="flex-1 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-500 transition-all transform active:scale-[0.98] shadow-lg shadow-red-600/20"
-                  >
-                    Save Preset
-                  </button>
+                <div className="space-y-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] uppercase font-black tracking-widest text-neutral-500 ml-1">Session Label</label>
+                    <input 
+                      type="text" 
+                      value={inputName}
+                      onChange={(e) => setInputName(e.target.value)}
+                      placeholder="e.g. FINAL PITCHES"
+                      className="w-full bg-neutral-800 border border-neutral-700 rounded-2xl p-5 text-white font-bold focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all"
+                    />
+                  </div>
+
+                  <div className="flex gap-6">
+                    <TimePickerUnit label="HOURS" value={inputH} max={99} onChange={setInputH} />
+                    <TimePickerUnit label="MINS" value={inputM} max={59} onChange={setInputM} />
+                    <TimePickerUnit label="SECS" value={inputS} max={59} onChange={setInputS} />
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <button 
+                      onClick={handleApplyTime}
+                      className="flex-1 py-5 bg-neutral-100 text-black font-black rounded-2xl hover:bg-white transition-all transform active:scale-[0.95] uppercase tracking-widest text-xs"
+                    >
+                      Set Time
+                    </button>
+                    <button 
+                      onClick={handleAddPreset}
+                      className="flex-1 py-5 bg-red-600 text-white font-black rounded-2xl hover:bg-red-500 transition-all transform active:scale-[0.95] shadow-lg shadow-red-600/20 uppercase tracking-widest text-xs"
+                    >
+                      Save Preset
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
-
-      {!isVisible && (
-        <div className="absolute bottom-4 text-neutral-800 group-hover:text-neutral-600 transition-colors pointer-events-none">
-          <ChevronUp size={24} />
-        </div>
-      )}
-    </div>
+    </>
   );
 };
