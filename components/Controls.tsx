@@ -79,7 +79,7 @@ const TimePickerUnit = ({
           borderRadius: '20px',
           padding: '24px 12px',
           color: '#fff',
-          fontFamily: 'Orbitron, monospace',
+          fontFamily: 'var(--font-orbitron), sans-serif',
           fontSize: '48px',
           fontWeight: '900',
           textAlign: 'center',
