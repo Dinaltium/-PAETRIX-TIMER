@@ -167,18 +167,18 @@ export const Controls: React.FC<ControlsProps> = ({
       initial="initial"
       whileHover="hover"
       animate={isSettingsOpen ? "hover" : "initial"}
-      className="fixed bottom-0 left-0 right-0 z-[100] h-64 flex flex-col items-center justify-end pb-12 group pointer-events-none"
+      className="fixed bottom-0 left-0 right-0 z-[100] h-64 flex flex-col items-center justify-end pointer-events-none"
     >
       {/* Invisible Trigger Zone */}
       <div className="absolute inset-0 pointer-events-auto" />
 
       <motion.div
         variants={{
-          initial: { y: 150, opacity: 0, scale: 0.9 },
-          hover: { y: 0, opacity: 1, scale: 1 }
+          initial: { y: 250, opacity: 0, scale: 0.9 },
+          hover: { y: -40, opacity: 1, scale: 1 }
         }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className="pointer-events-auto bg-neutral-900/95 backdrop-blur-3xl border border-neutral-800 rounded-[2.5rem] p-8 flex items-center gap-12 shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
+        transition={{ type: "spring", stiffness: 400, damping: 35 }}
+        className="pointer-events-auto bg-neutral-900/95 backdrop-blur-3xl border border-neutral-800 rounded-[2.5rem] p-8 flex items-center gap-12 shadow-[0_40px_100px_rgba(0,0,0,0.8)] mb-4"
       >
         <div className="flex items-center gap-6">
           {!isActive ? (
