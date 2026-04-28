@@ -17,8 +17,8 @@ interface TimerDisplayProps {
 
 const Digit = ({ value, color = "white", label }: { value: string; color?: "white" | "red"; label?: string }) => {
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative py-12 md:py-20 overflow-visible flex items-center justify-center w-[1.2em]">
+    <div className="flex flex-col items-center" style={{ width: '20rem', minWidth: '15rem' }}>
+      <div className="relative py-12 md:py-20 overflow-visible flex items-center justify-center w-full">
         <motion.div
           key={value}
           initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
@@ -26,7 +26,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
           exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={cn(
-            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-none tracking-tighter tabular-nums select-none text-center",
+            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-none tracking-tighter tabular-nums select-none text-center w-full",
             color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_80px_rgba(255,59,48,0.5)]"
           )}
         >
@@ -43,11 +43,14 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
 };
 
 const Separator = ({ color = "red" }: { color?: "white" | "red" }) => (
-  <div className={cn(
-    "text-[6rem] md:text-[10rem] lg:text-[14rem] font-thin opacity-20 mt-[-2rem] select-none",
-    color === "white" ? "text-white" : "text-[#FF3B30]"
-  )}>
-    :
+  <div 
+    className={cn(
+      "flex items-center justify-center opacity-20 select-none",
+      color === "white" ? "text-white" : "text-[#FF3B30]"
+    )}
+    style={{ width: '4rem', fontSize: '10rem' }}
+  >
+    <span style={{ marginTop: '-4rem' }}>:</span>
   </div>
 );
 
@@ -73,47 +76,35 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
   };
 
   const isOnlySeconds = h === 0 && m === 0;
-  const isOnlyMinutes = h === 0 && m > 0;
 
   return (
-    <div className="relative flex items-center justify-center w-full h-full overflow-visible px-12">
+    <div className="relative flex items-center justify-center w-full h-full overflow-visible">
       <motion.div
         animate={urgency ? "urgent" : "normal"}
         variants={urgencyVariants}
-        className="flex items-center justify-center gap-6 md:gap-12 lg:gap-16"
+        className="flex items-center justify-center"
       >
         <AnimatePresence mode="popLayout">
           {h > 0 && (
-            <motion.div
-              key="hours"
-              initial={{ x: -100, opacity: 0, scale: 0.8 }}
-              animate={{ x: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -100, opacity: 0, filter: "blur(20px)" }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-center gap-4 md:gap-8 lg:gap-12"
-            >
+            <React.Fragment key="hours-group">
               <Digit value={hh} color="white" label="Hours" />
               <Separator color="white" />
-            </motion.div>
+            </React.Fragment>
           )}
 
           {!isOnlySeconds && (
-            <motion.div
-              key="minutes"
-              layout
-              className="flex items-center gap-4 md:gap-8 lg:gap-12"
-            >
+            <React.Fragment key="minutes-group">
               <Digit 
                 value={mm} 
                 color={h === 0 ? "white" : "red"} 
                 label="Minutes"
               />
               <Separator color={h === 0 ? "white" : "red"} />
-            </motion.div>
+            </React.Fragment>
           )}
 
           <motion.div
-            key="seconds"
+            key="seconds-group"
             layout
             className={cn(
               "flex items-center justify-center",
