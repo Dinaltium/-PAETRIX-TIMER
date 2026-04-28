@@ -22,9 +22,18 @@ export function useCountdown() {
     const savedInitial = loadState(STORAGE_KEYS.INITIAL_TIME, 3600);
     const savedRemaining = loadState(STORAGE_KEYS.REMAINING_TIME, 3600);
     const savedMuted = loadState(STORAGE_KEYS.IS_MUTED, false);
+    const savedActive = loadState(STORAGE_KEYS.IS_ACTIVE, false);
+    const lastActive = loadState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
+
+    let finalRemaining = savedRemaining;
+    if (savedActive) {
+      const diff = Math.floor((Date.now() - lastActive) / 1000);
+      finalRemaining = Math.max(0, savedRemaining - diff);
+      setIsActive(true);
+    }
     
     setInitialTime(savedInitial);
-    setRemainingTime(savedRemaining);
+    setRemainingTime(finalRemaining);
     setIsMuted(savedMuted);
     setIsMounted(true);
   }, []);
@@ -36,12 +45,14 @@ export function useCountdown() {
     if (remainingTime > 0) {
       setIsActive(true);
       persistState(STORAGE_KEYS.IS_ACTIVE, true);
+      persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
     }
   }, [remainingTime]);
 
   const pause = useCallback(() => {
     setIsActive(false);
     persistState(STORAGE_KEYS.IS_ACTIVE, false);
+    persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
     if (timerRef.current) {
       cancelAnimationFrame(timerRef.current);
       timerRef.current = null;
@@ -100,6 +111,7 @@ export function useCountdown() {
         setRemainingTime((prev) => {
           const next = Math.max(0, prev - 1);
           persistState(STORAGE_KEYS.REMAINING_TIME, next);
+          persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
           if (next === 0) {
             setIsActive(false);
             persistState(STORAGE_KEYS.IS_ACTIVE, false);
@@ -127,7 +139,7 @@ export function useCountdown() {
         clearTimeout(timerRef.current);
       }
     };
-  }, [isActive, remainingTime]);
+  }, [isActive, remainingTime, playAlert]);
 
   if (!isMounted) return {
     initialTime: 3600,

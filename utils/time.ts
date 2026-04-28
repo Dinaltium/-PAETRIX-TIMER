@@ -32,6 +32,7 @@ export const STORAGE_KEYS = {
   IS_ACTIVE: "hackathon_timer_active",
   IS_MUTED: "hackathon_timer_muted",
   EVENT_NAME: "hackathon_timer_event_name",
+  LAST_ACTIVE_TIME: "hackathon_timer_last_active",
 };
 
 /**
