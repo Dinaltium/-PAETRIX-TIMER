@@ -18,7 +18,7 @@ interface TimerDisplayProps {
 const Digit = ({ value, color = "white", label }: { value: string; color?: "white" | "red"; label?: string }) => {
   return (
     <div className="flex flex-col items-center">
-      <div className="relative py-12 md:py-20 overflow-visible">
+      <div className="relative py-12 md:py-20 overflow-visible flex items-center justify-center w-[1.2em]">
         <motion.div
           key={value}
           initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
@@ -26,7 +26,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
           exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={cn(
-            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-none tracking-tighter tabular-nums select-none",
+            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-none tracking-tighter tabular-nums select-none text-center",
             color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_80px_rgba(255,59,48,0.5)]"
           )}
         >
