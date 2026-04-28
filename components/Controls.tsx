@@ -162,55 +162,55 @@ export const Controls: React.FC<ControlsProps> = ({
         {/* The Panel UI */}
         <div className={`
           pointer-events-auto
-          bg-neutral-900/90 backdrop-blur-3xl border border-white/10 rounded-full px-8 py-4 flex items-center gap-8 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)]
-          transition-all duration-500 ease-out transform
+          bg-black/60 backdrop-blur-3xl border border-white/10 rounded-full px-4 py-3 flex items-center gap-2 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)]
+          transition-all duration-700 ease-out transform
           ${isSettingsOpen ? 'opacity-0 translate-y-12' : 'opacity-0 translate-y-12 group-hover:opacity-100 group-hover:translate-y-0'}
         `}>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {!isActive ? (
               <button 
                 onClick={start}
-                className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all hover:scale-110 active:scale-95 shadow-xl"
+                className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
               >
-                <Play size={28} fill="currentColor" />
+                <Play size={20} fill="currentColor" />
               </button>
             ) : (
               <button 
                 onClick={pause}
-                className="w-14 h-14 bg-neutral-800 text-white rounded-full flex items-center justify-center hover:bg-neutral-700 transition-all hover:scale-110 active:scale-95 border border-white/10"
+                className="w-12 h-12 bg-neutral-800 text-white rounded-full flex items-center justify-center hover:bg-neutral-700 transition-all hover:scale-105 active:scale-95 border border-white/10"
               >
-                <Pause size={28} fill="currentColor" />
+                <Pause size={20} fill="currentColor" />
               </button>
             )}
             <button 
               onClick={reset}
-              className="p-3 text-neutral-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
+              className="w-12 h-12 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
               title="Reset"
             >
-              <RotateCcw size={24} />
+              <RotateCcw size={20} />
             </button>
           </div>
 
-          <div className="h-8 w-[1px] bg-white/10" />
+          <div className="h-6 w-[1px] bg-white/10 mx-2" />
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <button 
               onClick={toggleMute}
-              className="p-3 text-neutral-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
+              className="w-12 h-12 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
             >
-              {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
             </button>
             <button 
               onClick={toggleFullscreen}
-              className="p-3 text-neutral-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
+              className="w-12 h-12 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
             >
-              {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
             </button>
             <button 
               onClick={() => setIsSettingsOpen(true)}
-              className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-500 transition-all hover:rotate-90 active:scale-90"
+              className="w-12 h-12 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full flex items-center justify-center transition-all border border-red-600/20 hover:shadow-[0_0_30px_rgba(220,38,38,0.4)]"
             >
-              <Settings size={24} />
+              <Settings size={20} />
             </button>
           </div>
         </div>
