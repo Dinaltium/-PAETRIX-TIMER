@@ -69,6 +69,23 @@ export const Controls: React.FC<ControlsProps> = (props) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [customSoundUrl, setCustomSoundUrl] = useState("");
+  const [localSounds, setLocalSounds] = useState<string[]>([]);
+  const [isLoadingLocal, setIsLoadingLocal] = useState(false);
+
+  const fetchLocalSounds = async () => {
+    setIsLoadingLocal(true);
+    try {
+      const res = await fetch('/api/alerts');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setLocalSounds(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch local sounds:", e);
+    } finally {
+      setIsLoadingLocal(false);
+    }
+  };
 
   const soundPresets = [
     { name: "Digital Alert", url: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" },
@@ -79,6 +96,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
 
   useEffect(() => {
     setIsMounted(true);
+    fetchLocalSounds();
     setPresets(loadState("timer_presets", [
       { name: "Hacking (24h)", seconds: 24 * 3600 },
       { name: "Final Stretch (1h)", seconds: 3600 },
@@ -310,33 +328,90 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                   <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Alert Sound</h3>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    {soundPresets.map((s, i) => (
-                      <button
-                        key={i}
-                        onClick={() => props.updateAlertSound(s.url)}
-                        style={{
-                          padding: '16px',
-                          backgroundColor: props.alertSound === s.url ? 'rgba(255, 59, 48, 0.1)' : 'rgba(255,255,255,0.02)',
-                          border: props.alertSound === s.url ? '1px solid #FF3B30' : '1px solid rgba(255, 255, 255, 0.05)',
-                          borderRadius: '16px',
-                          color: props.alertSound === s.url ? '#fff' : '#888',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '8px',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        <div style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px' }}>{s.name}</div>
-                        <div 
-                          onClick={(e) => { e.stopPropagation(); testSound(s.url); }}
-                          style={{ fontSize: '9px', textTransform: 'uppercase', color: '#FF3B30', fontWeight: 'bold' }}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Presets</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {soundPresets.map((s, i) => (
+                          <button
+                            key={i}
+                            onClick={() => props.updateAlertSound(s.url)}
+                            style={{
+                              padding: '16px',
+                              backgroundColor: props.alertSound === s.url ? 'rgba(255, 59, 48, 0.1)' : 'rgba(255,255,255,0.02)',
+                              border: props.alertSound === s.url ? '1px solid #FF3B30' : '1px solid rgba(255, 255, 255, 0.05)',
+                              borderRadius: '16px',
+                              color: props.alertSound === s.url ? '#fff' : '#888',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '8px',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            <div style={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px' }}>{s.name}</div>
+                            <div 
+                              onClick={(e) => { e.stopPropagation(); testSound(s.url); }}
+                              style={{ fontSize: '9px', textTransform: 'uppercase', color: '#FF3B30', fontWeight: 'bold' }}
+                            >
+                              ▶ Test
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Local Assets (/public/alerts/)</div>
+                        <button 
+                          onClick={(e) => { e.preventDefault(); fetchLocalSounds(); }}
+                          disabled={isLoadingLocal}
+                          style={{ fontSize: '9px', color: '#FF3B30', backgroundColor: 'transparent', border: 'none', fontWeight: '900', cursor: 'pointer', textTransform: 'uppercase' }}
                         >
-                          ▶ Test
+                          {isLoadingLocal ? 'Scanning...' : 'Refresh'}
+                        </button>
+                      </div>
+                      
+                      {localSounds.length > 0 ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                          {localSounds.map((filename, i) => {
+                            const url = `/alerts/${filename}`;
+                            return (
+                              <button
+                                key={i}
+                                onClick={() => props.updateAlertSound(url)}
+                                style={{
+                                  padding: '16px',
+                                  backgroundColor: props.alertSound === url ? 'rgba(255, 59, 48, 0.1)' : 'rgba(255,255,255,0.02)',
+                                  border: props.alertSound === url ? '1px solid #FF3B30' : '1px solid rgba(255, 255, 255, 0.05)',
+                                  borderRadius: '16px',
+                                  color: props.alertSound === url ? '#fff' : '#888',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '8px',
+                                  transition: 'all 0.2s',
+                                  textAlign: 'left'
+                                }}
+                              >
+                                <div style={{ fontSize: '9px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{filename}</div>
+                                <div 
+                                  onClick={(e) => { e.stopPropagation(); testSound(url); }}
+                                  style={{ fontSize: '9px', textTransform: 'uppercase', color: '#FF3B30', fontWeight: 'bold' }}
+                                >
+                                  ▶ Test
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
-                      </button>
-                    ))}
+                      ) : (
+                        <div style={{ padding: '24px', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.05)', borderRadius: '16px', textAlign: 'center' }}>
+                          <div style={{ fontSize: '10px', color: '#444', textTransform: 'uppercase', fontWeight: 'bold' }}>No files found in /public/alerts/</div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
@@ -358,7 +433,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                     </div>
                   </div>
 
-                  <div style={{ marginTop: '24px', padding: '24px', backgroundColor: 'rgba(255, 59, 48, 0.05)', borderRadius: '24px', border: '1px solid rgba(255, 59, 48, 0.1)' }}>
+                  <div style={{ marginTop: '12px', padding: '24px', backgroundColor: 'rgba(255, 59, 48, 0.05)', borderRadius: '24px', border: '1px solid rgba(255, 59, 48, 0.1)' }}>
                     <div style={{ fontSize: '9px', color: '#FF3B30', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '8px' }}>Active Selection</div>
                     <div style={{ color: '#fff', fontSize: '11px', wordBreak: 'break-all', opacity: 0.6, fontFamily: 'monospace' }}>{props.alertSound}</div>
                   </div>
