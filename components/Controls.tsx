@@ -200,7 +200,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
       {/* Settings Modal */}
       <AnimatePresence>
         {isSettingsOpen && (
-          <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justify: 'center', padding: '24px' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -224,7 +224,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                 boxShadow: '0 50px 100px -20px rgba(0, 0, 0, 1)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'between', marginBottom: '64px' }}>
+              <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', marginBottom: '64px' }}>
                 <div style={{ flex: 1 }}>
                   <h2 style={{ color: '#fff', fontSize: '56px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-3px' }}>Settings</h2>
                 </div>
