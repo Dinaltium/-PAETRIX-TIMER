@@ -166,42 +166,44 @@ export const Controls: React.FC<ControlsProps> = ({
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-[100] pointer-events-none group">
-        {/* Invisible trigger area */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-48 pointer-events-auto"
-          onMouseEnter={() => setIsVisible(true)}
-          onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
-        />
+      {/* GLOBAL HOVER TRIGGER (Always present, pointer-events only on itself) */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 h-32 z-[90] pointer-events-auto"
+        onMouseEnter={() => setIsVisible(true)}
+      />
 
-        <div className="relative flex flex-col items-center justify-end pb-12 w-full h-48">
+      <div 
+        className="fixed bottom-0 left-0 right-0 z-[100] pointer-events-none flex flex-col items-center"
+        onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
+      >
+        <div className="relative flex flex-col items-center justify-end pb-16 w-full h-48">
           <AnimatePresence>
             {isVisible && (
               <motion.div
-                initial={{ y: 20, opacity: 0, scale: 0.95 }}
+                initial={{ y: 20, opacity: 0, scale: 0.9 }}
                 animate={{ y: 0, opacity: 1, scale: 1 }}
-                exit={{ y: 20, opacity: 0, scale: 0.95 }}
-                className="pointer-events-auto bg-neutral-900/95 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-6 flex items-center gap-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
+                exit={{ y: 20, opacity: 0, scale: 0.9 }}
+                className="pointer-events-auto bg-neutral-900/95 backdrop-blur-3xl border border-white/10 rounded-full px-8 py-4 flex items-center gap-10 shadow-[0_40px_100px_rgba(0,0,0,0.8)]"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
                   {!isActive ? (
                     <button 
                       onClick={start}
-                      className="p-6 bg-white text-black rounded-full hover:bg-neutral-200 transition-all hover:scale-110 active:scale-90 shadow-xl"
+                      className="w-20 h-20 flex items-center justify-center bg-white text-black rounded-full hover:bg-neutral-200 transition-all hover:scale-110 active:scale-90 shadow-xl"
                     >
-                      <Play size={32} fill="currentColor" />
+                      <Play size={40} fill="currentColor" className="ml-1" />
                     </button>
                   ) : (
                     <button 
                       onClick={pause}
-                      className="p-6 bg-neutral-800 text-white rounded-full hover:bg-neutral-700 transition-all hover:scale-110 active:scale-90 border border-neutral-700"
+                      className="w-20 h-20 flex items-center justify-center bg-neutral-800 text-white rounded-full hover:bg-neutral-700 transition-all hover:scale-110 active:scale-90 border border-neutral-700"
                     >
-                      <Pause size={32} fill="currentColor" />
+                      <Pause size={40} fill="currentColor" />
                     </button>
                   )}
                   <button 
                     onClick={reset}
-                    className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all group/reset"
+                    className="w-16 h-16 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all group/reset"
                     title="Reset Timer"
                   >
                     <RotateCcw size={32} className="group-active/reset:rotate-[-180deg] transition-transform duration-500" />
@@ -210,22 +212,22 @@ export const Controls: React.FC<ControlsProps> = ({
 
                 <div className="h-12 w-[1px] bg-neutral-800" />
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-6">
                   <button 
                     onClick={toggleMute}
-                    className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all hover:scale-110"
+                    className="w-16 h-16 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all"
                   >
                     {isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
                   </button>
                   <button 
                     onClick={toggleFullscreen}
-                    className="p-6 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all hover:scale-110"
+                    className="w-16 h-16 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all"
                   >
                     {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
                   </button>
                   <button 
                     onClick={() => setIsSettingsOpen(true)}
-                    className="p-6 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all border border-red-600/20 hover:scale-110 shadow-lg shadow-red-600/10"
+                    className="w-16 h-16 flex items-center justify-center bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all border border-red-600/20 shadow-lg shadow-red-600/10"
                   >
                     <Settings size={32} />
                   </button>
@@ -235,8 +237,8 @@ export const Controls: React.FC<ControlsProps> = ({
           </AnimatePresence>
 
           {!isVisible && !isSettingsOpen && (
-            <div className="absolute bottom-6 flex flex-col items-center gap-2 opacity-20 transition-opacity">
-               <ChevronUp size={24} className="text-neutral-500 animate-bounce" />
+            <div className="absolute bottom-10 flex flex-col items-center gap-2 opacity-10 transition-opacity group-hover:opacity-30">
+               <ChevronUp size={20} className="text-neutral-500" />
             </div>
           )}
         </div>
@@ -250,13 +252,13 @@ export const Controls: React.FC<ControlsProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+              className="absolute inset-0 bg-black/90 backdrop-blur-sm"
               onClick={() => setIsSettingsOpen(false)}
             />
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
               className="relative bg-neutral-900 border border-neutral-800 rounded-[3rem] p-10 w-full max-w-[550px] shadow-[0_50px_100px_rgba(0,0,0,1)]"
             >
               <div className="flex items-center justify-between mb-10">
