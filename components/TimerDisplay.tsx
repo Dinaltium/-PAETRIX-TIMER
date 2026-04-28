@@ -34,7 +34,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
         </motion.div>
       </div>
       {label && (
-        <span className="text-xs md:text-sm uppercase tracking-normal text-neutral-500 font-bold mt-[-1rem]">
+        <span className="text-xs md:text-sm uppercase tracking-[0.4em] text-neutral-500 font-bold mt-4">
           {label}
         </span>
       )}
@@ -92,7 +92,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="flex items-center gap-4 md:gap-8 lg:gap-12"
             >
-              <Digit value={hh} color="white" label="Hours" />
+              <Digit value={hh} color="white" label="HOURS" />
               <Separator color="white" />
             </motion.div>
           )}
@@ -106,7 +106,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
               <Digit 
                 value={mm} 
                 color={h === 0 ? "white" : "red"} 
-                label={isOnlyMinutes ? "Minutes" : undefined} 
+                label="MINS" 
               />
               <Separator color={h === 0 ? "white" : "red"} />
             </motion.div>
@@ -123,7 +123,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
             <Digit 
               value={ss} 
               color={isOnlySeconds ? "white" : "red"} 
-              label={isOnlySeconds ? "Seconds" : undefined}
+              label="SECS"
             />
           </motion.div>
         </AnimatePresence>
