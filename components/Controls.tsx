@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { 
   Play, Pause, RotateCcw, Maximize, Minimize, 
-  Volume2, VolumeX, Settings, X, Plus, ChevronUp
+  Volume2, VolumeX, Settings, X, Plus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSecondsFromHHMMSS, formatTime, loadState, persistState } from "@/utils/time";
@@ -43,7 +43,7 @@ const TimePickerUnit = ({
           width: '100%',
           backgroundColor: 'rgba(255, 255, 255, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '16px',
+          borderRadius: '20px',
           padding: '24px 12px',
           color: '#fff',
           fontFamily: 'monospace',
@@ -79,14 +79,13 @@ export const Controls: React.FC<ControlsProps> = (props) => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     
-    // Auto-hide mouse and UI if inactive
     let hideTimeout: any;
     const handleMove = () => {
       setIsVisible(true);
       clearTimeout(hideTimeout);
       hideTimeout = setTimeout(() => {
         if (!isSettingsOpen) setIsVisible(false);
-      }, 3000);
+      }, 4000);
     };
 
     window.addEventListener("mousemove", handleMove);
@@ -111,105 +110,98 @@ export const Controls: React.FC<ControlsProps> = (props) => {
 
   return (
     <>
-      {/* Cinematic Control Bar - Uses Inline Styles for Build Stability */}
+      {/* 2ND SS RESTORATION: Chunky, Bold, Rounded-Rectangle UI */}
       <div style={{
         position: 'fixed',
-        bottom: '40px',
+        bottom: '60px',
         left: '50%',
-        transform: `translateX(-50%) translateY(${isVisible || isSettingsOpen ? '0' : '100px'})`,
+        transform: `translateX(-50%) translateY(${isVisible || isSettingsOpen ? '0' : '120px'})`,
         opacity: isVisible || isSettingsOpen ? 1 : 0,
-        backgroundColor: 'rgba(15, 15, 15, 0.9)',
-        backdropFilter: 'blur(30px)',
-        WebkitBackdropFilter: 'blur(30px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '9999px',
-        padding: '12px 24px',
+        backgroundColor: '#111111',
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        borderRadius: '32px',
+        padding: '16px 20px',
         display: 'flex',
         alignItems: 'center',
         gap: '24px',
         zIndex: 1000,
-        transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+        transition: 'all 0.5s cubic-bezier(0.2, 0, 0, 1)',
+        boxShadow: '0 40px 80px -20px rgba(0, 0, 0, 0.8)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button 
             onClick={props.isActive ? props.pause : props.start}
             style={{
-              width: '56px',
-              height: '56px',
+              width: '80px',
+              height: '80px',
               borderRadius: '50%',
-              backgroundColor: props.isActive ? 'rgba(255, 255, 255, 0.1)' : '#fff',
-              color: props.isActive ? '#fff' : '#000',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '2px solid rgba(255, 255, 255, 0.1)',
+              color: '#fff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: 'none',
               cursor: 'pointer',
-              transition: 'all 0.3s'
+              transition: 'all 0.2s'
             }}
           >
-            {props.isActive ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" />}
+            {props.isActive ? (
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <div style={{ width: '6px', height: '24px', backgroundColor: '#fff', borderRadius: '2px' }} />
+                <div style={{ width: '6px', height: '24px', backgroundColor: '#fff', borderRadius: '2px' }} />
+              </div>
+            ) : (
+              <Play size={32} fill="currentColor" />
+            )}
           </button>
           
           <button 
             onClick={props.reset}
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '50%',
-              backgroundColor: 'transparent',
-              color: '#999',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.3s'
-            }}
+            style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}
           >
-            <RotateCcw size={24} />
+            <RotateCcw size={32} />
           </button>
         </div>
 
-        <div style={{ width: '1px', height: '32px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
+        <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255, 255, 255, 0.05)' }} />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button 
             onClick={props.toggleMute}
-            style={{ width: '48px', height: '48px', borderRadius: '50%', border: 'none', cursor: 'pointer', backgroundColor: 'transparent', color: '#999' }}
+            style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}
           >
-            {props.isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+            {props.isMuted ? <VolumeX size={32} /> : <Volume2 size={32} />}
           </button>
           
           <button 
             onClick={toggleFullscreen}
-            style={{ width: '48px', height: '48px', borderRadius: '50%', border: 'none', cursor: 'pointer', backgroundColor: 'transparent', color: '#999' }}
+            style={{ width: '48px', height: '48px', border: 'none', backgroundColor: 'transparent', color: '#999', cursor: 'pointer' }}
           >
-            {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+            {isFullscreen ? <Minimize size={32} /> : <Maximize size={32} />}
           </button>
 
           <button 
             onClick={() => setIsSettingsOpen(true)}
             style={{
-              width: '48px',
-              height: '48px',
+              width: '80px',
+              height: '80px',
               borderRadius: '50%',
-              backgroundColor: 'rgba(255, 59, 48, 0.1)',
-              color: '#FF3B30',
+              backgroundColor: 'rgba(220, 38, 38, 0.05)',
+              border: '2px solid rgba(220, 38, 38, 0.1)',
+              color: '#dc2626',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '1px solid rgba(255, 59, 48, 0.2)',
               cursor: 'pointer',
-              transition: 'all 0.3s'
+              transition: 'all 0.2s'
             }}
           >
-            <Settings size={24} />
+            <Settings size={32} />
           </button>
         </div>
       </div>
 
-      {/* Settings Modal */}
+      {/* Settings Modal - Also Chunky & Bold */}
       <AnimatePresence>
         {isSettingsOpen && (
           <div style={{
@@ -237,83 +229,62 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                 position: 'relative',
                 backgroundColor: '#0a0a0a',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '40px',
-                padding: '48px',
+                borderRadius: '48px',
+                padding: '64px',
                 width: '100%',
-                maxWidth: '800px',
+                maxWidth: '900px',
                 boxShadow: '0 50px 100px -20px rgba(0, 0, 0, 1)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'between', marginBottom: '40px' }}>
+              <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'between', marginBottom: '64px' }}>
                 <div style={{ flex: 1 }}>
-                  <h2 style={{ color: '#fff', fontSize: '48px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-2px' }}>Timer Studio</h2>
-                  <p style={{ color: '#666', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '4px', fontSize: '10px' }}>Configuration Node</p>
+                  <h2 style={{ color: '#fff', fontSize: '56px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-3px' }}>Settings</h2>
                 </div>
                 <button 
                   onClick={() => setIsSettingsOpen(false)}
-                  style={{ width: '56px', height: '56px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer' }}
+                  style={{ width: '64px', height: '64px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer' }}
                 >
-                  <X size={24} />
+                  <X size={32} />
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '48px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#999', textTransform: 'uppercase', letterSpacing: '2px', borderLeft: '3px solid #FF3B30', paddingLeft: '12px' }}>Presets</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '64px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <h3 style={{ fontSize: '12px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Presets</h3>
                   {presets.map((p, i) => (
                     <button
                       key={i}
                       onClick={() => { props.setTime(p.seconds); setIsSettingsOpen(false); }}
                       style={{
-                        padding: '20px',
+                        padding: '32px',
                         textAlign: 'left',
-                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                        backgroundColor: '#111',
                         border: '1px solid rgba(255, 255, 255, 0.05)',
-                        borderRadius: '20px',
+                        borderRadius: '24px',
                         color: '#fff',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        cursor: 'pointer'
                       }}
                     >
-                      <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900' }}>{p.name}</div>
-                      <div style={{ fontSize: '20px', fontWeight: '900', fontFamily: 'monospace', marginTop: '4px' }}>
+                      <div style={{ fontSize: '10px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>{p.name}</div>
+                      <div style={{ fontSize: '28px', fontWeight: '900', fontFamily: 'monospace', marginTop: '8px' }}>
                         {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
                       </div>
                     </button>
                   ))}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                  <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#999', textTransform: 'uppercase', letterSpacing: '2px', borderLeft: '3px solid #FF3B30', paddingLeft: '12px' }}>Custom Node</h3>
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <TimePickerUnit label="HR" value={inputH} max={99} onChange={setInputH} />
-                    <TimePickerUnit label="MIN" value={inputM} max={59} onChange={setInputM} />
-                    <TimePickerUnit label="SEC" value={inputS} max={59} onChange={setInputS} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                  <h3 style={{ fontSize: '12px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Custom</h3>
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <TimePickerUnit label="HH" value={inputH} max={99} onChange={setInputH} />
+                    <TimePickerUnit label="MM" value={inputM} max={59} onChange={setInputM} />
+                    <TimePickerUnit label="SS" value={inputS} max={59} onChange={setInputS} />
                   </div>
 
-                  <input 
-                    type="text" 
-                    value={inputName}
-                    onChange={(e) => setInputName(e.target.value)}
-                    style={{
-                      width: '100%',
-                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                      border: '1px solid rgba(255, 255, 255, 0.05)',
-                      borderRadius: '20px',
-                      padding: '20px',
-                      color: '#fff',
-                      fontWeight: '900',
-                      fontSize: '12px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '2px'
-                    }}
-                    placeholder="LABEL"
-                  />
-
-                  <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ display: 'flex', gap: '16px' }}>
                     <button 
                       onClick={() => { props.setTime(getSecondsFromHHMMSS(inputH, inputM, inputS)); setIsSettingsOpen(false); }}
-                      style={{ flex: 1, padding: '24px', backgroundColor: '#fff', color: '#000', borderRadius: '20px', border: 'none', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', cursor: 'pointer' }}
+                      style={{ flex: 1, padding: '32px', backgroundColor: '#fff', color: '#000', borderRadius: '24px', border: 'none', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '18px', cursor: 'pointer' }}
                     >
                       Apply
                     </button>
@@ -324,9 +295,9 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                         setPresets(newPresets);
                         persistState("timer_presets", newPresets);
                       }}
-                      style={{ width: '80px', height: '80px', backgroundColor: '#1a1a1a', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '20px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justify: 'center' }}
+                      style={{ width: '96px', height: '96px', backgroundColor: '#1a1a1a', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '24px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
-                      <Plus size={32} />
+                      <Plus size={40} />
                     </button>
                   </div>
                 </div>
