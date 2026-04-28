@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Play, Pause, RotateCcw, Maximize, Minimize, 
-  Volume2, VolumeX, Settings, X, ChevronUp, Plus, ArrowRight
+  Volume2, VolumeX, Settings, X, Plus, ChevronUp
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSecondsFromHHMMSS, formatTime, loadState, persistState } from "@/utils/time";
@@ -31,91 +31,34 @@ const TimePickerUnit = ({
   onChange: (val: number) => void,
   max: number 
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [startValue, setStartValue] = useState(0);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartY(e.clientY);
-    setStartValue(value);
-    document.body.style.cursor = 'ns-resize';
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      const delta = Math.floor((startY - e.clientY) / 5); // Faster sensitivity
-      let newValue = startValue + delta;
-      if (newValue < 0) newValue = 0;
-      if (newValue > max) newValue = max;
-      onChange(newValue);
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.body.style.cursor = 'default';
-    };
-
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, startY, startValue, max, onChange]);
-
   return (
-    <div className="flex flex-col gap-3 flex-1 items-center group">
-      <span className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] group-hover:text-red-500 transition-colors">{label}</span>
+    <div className="flex flex-col gap-2 flex-1 items-center">
+      <span style={{ fontSize: '10px', fontWeight: '900', color: '#666', letterSpacing: '2px', textTransform: 'uppercase' }}>{label}</span>
       <div 
-        onMouseDown={handleMouseDown}
         onWheel={(e) => {
           const delta = e.deltaY > 0 ? -1 : 1;
           onChange(Math.min(max, Math.max(0, value + delta)));
         }}
-        className={`
-          w-full aspect-square flex items-center justify-center
-          bg-neutral-900 border border-white/5 rounded-2xl
-          text-white font-mono text-5xl font-black
-          cursor-ns-resize select-none transition-all
-          ${isDragging ? 'border-red-600 scale-105 bg-neutral-800 shadow-[0_0_30px_rgba(220,38,38,0.2)]' : 'hover:border-white/20'}
-        `}
+        style={{
+          width: '100%',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '16px',
+          padding: '24px 12px',
+          color: '#fff',
+          fontFamily: 'monospace',
+          fontSize: '48px',
+          fontWeight: '900',
+          textAlign: 'center',
+          cursor: 'ns-resize',
+          userSelect: 'none'
+        }}
       >
         {value.toString().padStart(2, '0')}
       </div>
     </div>
   );
 };
-
-const ControlButton = ({ 
-  onClick, 
-  icon, 
-  active = false, 
-  danger = false,
-  className = ""
-}: { 
-  onClick: () => void, 
-  icon: React.ReactNode, 
-  active?: boolean,
-  danger?: boolean,
-  className?: string
-}) => (
-  <button 
-    onClick={onClick}
-    className={`
-      w-12 h-12 flex items-center justify-center rounded-full transition-all duration-300
-      ${active ? 'bg-white text-black scale-110 shadow-lg' : 'text-neutral-400 hover:text-white hover:bg-white/10'}
-      ${danger ? 'hover:bg-red-600 hover:text-white' : ''}
-      ${className}
-    `}
-  >
-    {icon}
-  </button>
-);
 
 export const Controls: React.FC<ControlsProps> = (props) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -132,19 +75,32 @@ export const Controls: React.FC<ControlsProps> = (props) => {
       { name: "Demo (5m)", seconds: 300 },
       { name: "Quick Break (15m)", seconds: 15 * 60 },
     ]));
-  }, []);
+
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    
+    // Auto-hide mouse and UI if inactive
+    let hideTimeout: any;
+    const handleMove = () => {
+      setIsVisible(true);
+      clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => {
+        if (!isSettingsOpen) setIsVisible(false);
+      }, 3000);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("mousemove", handleMove);
+    };
+  }, [isSettingsOpen]);
 
   const { h, m, s } = formatTime(props.initialTime);
   const [inputH, setInputH] = useState(h);
   const [inputM, setInputM] = useState(m);
   const [inputS, setInputS] = useState(s);
   const [inputName, setInputName] = useState("Custom Timer");
-
-  useEffect(() => {
-    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
@@ -155,134 +111,223 @@ export const Controls: React.FC<ControlsProps> = (props) => {
 
   return (
     <>
-      {/* Global Hover Trigger Bar */}
-      <div 
-        className="fixed bottom-0 left-0 right-0 h-24 z-50 pointer-events-auto"
-        onMouseEnter={() => setIsVisible(true)}
-        onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
-      />
+      {/* Cinematic Control Bar - Uses Inline Styles for Build Stability */}
+      <div style={{
+        position: 'fixed',
+        bottom: '40px',
+        left: '50%',
+        transform: `translateX(-50%) translateY(${isVisible || isSettingsOpen ? '0' : '100px'})`,
+        opacity: isVisible || isSettingsOpen ? 1 : 0,
+        backgroundColor: 'rgba(15, 15, 15, 0.9)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '9999px',
+        padding: '12px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '24px',
+        zIndex: 1000,
+        transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button 
+            onClick={props.isActive ? props.pause : props.start}
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              backgroundColor: props.isActive ? 'rgba(255, 255, 255, 0.1)' : '#fff',
+              color: props.isActive ? '#fff' : '#000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
+          >
+            {props.isActive ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" />}
+          </button>
+          
+          <button 
+            onClick={props.reset}
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              backgroundColor: 'transparent',
+              color: '#999',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
+          >
+            <RotateCcw size={24} />
+          </button>
+        </div>
 
-      {/* Control Panel Container */}
-      <div className={`
-        fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] pointer-events-none
-        transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]
-        ${isVisible || isSettingsOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}
-      `}>
-        <div className="pointer-events-auto bg-neutral-900/80 backdrop-blur-3xl border border-white/10 rounded-full px-3 py-3 flex items-center gap-1 shadow-2xl">
-          <ControlButton 
-            onClick={props.isActive ? props.pause : props.start} 
-            active={props.isActive}
-            icon={props.isActive ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />} 
-          />
-          <ControlButton onClick={props.reset} icon={<RotateCcw size={20} />} />
+        <div style={{ width: '1px', height: '32px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button 
+            onClick={props.toggleMute}
+            style={{ width: '48px', height: '48px', borderRadius: '50%', border: 'none', cursor: 'pointer', backgroundColor: 'transparent', color: '#999' }}
+          >
+            {props.isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+          </button>
           
-          <div className="w-[1px] h-6 bg-white/10 mx-2" />
-          
-          <ControlButton onClick={props.toggleMute} icon={props.isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />} />
-          <ControlButton onClick={toggleFullscreen} icon={isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />} />
-          <ControlButton 
-            onClick={() => setIsSettingsOpen(true)} 
-            icon={<Settings size={20} />} 
-            className="hover:rotate-90 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white"
-          />
+          <button 
+            onClick={toggleFullscreen}
+            style={{ width: '48px', height: '48px', borderRadius: '50%', border: 'none', cursor: 'pointer', backgroundColor: 'transparent', color: '#999' }}
+          >
+            {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+          </button>
+
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255, 59, 48, 0.1)',
+              color: '#FF3B30',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid rgba(255, 59, 48, 0.2)',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
+          >
+            <Settings size={24} />
+          </button>
         </div>
       </div>
 
       {/* Settings Modal */}
       <AnimatePresence>
         {isSettingsOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px'
+          }}>
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsSettingsOpen(false)}
-              className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+              style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.95)', backdropFilter: 'blur(20px)' }}
             />
             
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="relative bg-black border border-white/10 rounded-[3rem] p-12 w-full max-w-2xl shadow-[0_50px_100px_-20px_rgba(220,38,38,0.15)] overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              style={{
+                position: 'relative',
+                backgroundColor: '#0a0a0a',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '40px',
+                padding: '48px',
+                width: '100%',
+                maxWidth: '800px',
+                boxShadow: '0 50px 100px -20px rgba(0, 0, 0, 1)'
+              }}
             >
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-50" />
-
-              <div className="flex items-start justify-between mb-12">
-                <div>
-                  <h2 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Settings</h2>
-                  <p className="text-neutral-500 font-bold mt-2 uppercase tracking-[0.3em] text-[10px]">Master Configuration Control</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'between', marginBottom: '40px' }}>
+                <div style={{ flex: 1 }}>
+                  <h2 style={{ color: '#fff', fontSize: '48px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-2px' }}>Timer Studio</h2>
+                  <p style={{ color: '#666', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '4px', fontSize: '10px' }}>Configuration Node</p>
                 </div>
                 <button 
                   onClick={() => setIsSettingsOpen(false)}
-                  className="w-14 h-14 bg-white/5 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all group"
+                  style={{ width: '56px', height: '56px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer' }}
                 >
-                  <X size={24} className="group-hover:rotate-90 transition-transform" />
+                  <X size={24} />
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {/* Left: Presets */}
-                <div className="space-y-6">
-                  <h3 className="text-[10px] font-black text-neutral-400 uppercase tracking-widest border-l-2 border-red-600 pl-3">Presets</h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {presets.map((p, i) => (
-                      <button
-                        key={i}
-                        onClick={() => { props.setTime(p.seconds); setIsSettingsOpen(false); }}
-                        className="flex items-center justify-between p-5 bg-neutral-900 border border-white/5 rounded-2xl hover:border-red-600/50 hover:bg-neutral-800 transition-all group"
-                      >
-                        <div>
-                          <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest">{p.name}</div>
-                          <div className="text-xl text-white font-mono font-black italic mt-1">
-                            {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
-                          </div>
-                        </div>
-                        <ArrowRight size={18} className="text-neutral-700 group-hover:text-red-500 transition-colors" />
-                      </button>
-                    ))}
-                  </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '48px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#999', textTransform: 'uppercase', letterSpacing: '2px', borderLeft: '3px solid #FF3B30', paddingLeft: '12px' }}>Presets</h3>
+                  {presets.map((p, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { props.setTime(p.seconds); setIsSettingsOpen(false); }}
+                      style={{
+                        padding: '20px',
+                        textAlign: 'left',
+                        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        borderRadius: '20px',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900' }}>{p.name}</div>
+                      <div style={{ fontSize: '20px', fontWeight: '900', fontFamily: 'monospace', marginTop: '4px' }}>
+                        {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
+                      </div>
+                    </button>
+                  ))}
                 </div>
 
-                {/* Right: Custom */}
-                <div className="space-y-6">
-                  <h3 className="text-[10px] font-black text-neutral-400 uppercase tracking-widest border-l-2 border-red-600 pl-3">Custom Timer</h3>
-                  <div className="space-y-6">
-                    <div className="flex gap-4">
-                      <TimePickerUnit label="Hours" value={inputH} max={99} onChange={setInputH} />
-                      <TimePickerUnit label="Mins" value={inputM} max={59} onChange={setInputM} />
-                      <TimePickerUnit label="Secs" value={inputS} max={59} onChange={setInputS} />
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#999', textTransform: 'uppercase', letterSpacing: '2px', borderLeft: '3px solid #FF3B30', paddingLeft: '12px' }}>Custom Node</h3>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <TimePickerUnit label="HR" value={inputH} max={99} onChange={setInputH} />
+                    <TimePickerUnit label="MIN" value={inputM} max={59} onChange={setInputM} />
+                    <TimePickerUnit label="SEC" value={inputS} max={59} onChange={setInputS} />
+                  </div>
 
-                    <div className="space-y-2">
-                      <input 
-                        type="text" 
-                        value={inputName}
-                        onChange={(e) => setInputName(e.target.value)}
-                        className="w-full bg-neutral-900 border border-white/5 rounded-2xl p-5 text-white font-bold focus:outline-none focus:border-red-600/50 transition-all text-sm uppercase tracking-widest"
-                        placeholder="TIMER LABEL"
-                      />
-                    </div>
+                  <input 
+                    type="text" 
+                    value={inputName}
+                    onChange={(e) => setInputName(e.target.value)}
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      borderRadius: '20px',
+                      padding: '20px',
+                      color: '#fff',
+                      fontWeight: '900',
+                      fontSize: '12px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '2px'
+                    }}
+                    placeholder="LABEL"
+                  />
 
-                    <div className="flex gap-3">
-                      <button 
-                        onClick={() => { props.setTime(getSecondsFromHHMMSS(inputH, inputM, inputS)); setIsSettingsOpen(false); }}
-                        className="flex-1 py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-[11px] rounded-2xl hover:bg-red-600 hover:text-white transition-all shadow-xl active:scale-95"
-                      >
-                        Apply
-                      </button>
-                      <button 
-                        onClick={() => {
-                          const total = getSecondsFromHHMMSS(inputH, inputM, inputS);
-                          const newPresets = [...presets, { name: inputName, seconds: total }];
-                          setPresets(newPresets);
-                          persistState("timer_presets", newPresets);
-                        }}
-                        className="w-16 py-5 bg-neutral-900 border border-white/5 text-white rounded-2xl flex items-center justify-center hover:bg-neutral-800 hover:border-red-600/50 transition-all active:scale-95"
-                      >
-                        <Plus size={24} />
-                      </button>
-                    </div>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button 
+                      onClick={() => { props.setTime(getSecondsFromHHMMSS(inputH, inputM, inputS)); setIsSettingsOpen(false); }}
+                      style={{ flex: 1, padding: '24px', backgroundColor: '#fff', color: '#000', borderRadius: '20px', border: 'none', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '2px', cursor: 'pointer' }}
+                    >
+                      Apply
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const total = getSecondsFromHHMMSS(inputH, inputM, inputS);
+                        const newPresets = [...presets, { name: inputName, seconds: total }];
+                        setPresets(newPresets);
+                        persistState("timer_presets", newPresets);
+                      }}
+                      style={{ width: '80px', height: '80px', backgroundColor: '#1a1a1a', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '20px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justify: 'center' }}
+                    >
+                      <Plus size={32} />
+                    </button>
                   </div>
                 </div>
               </div>
