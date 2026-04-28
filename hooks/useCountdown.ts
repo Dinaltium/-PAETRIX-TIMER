@@ -16,6 +16,7 @@ export function useCountdown() {
   const [isActive, setIsActive] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [alertSound, setAlertSound] = useState<string>("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+  const [triggers, setTriggers] = useState<{time: number, soundUrl: string}[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
   // Initialize state from localStorage after mount
@@ -26,6 +27,7 @@ export function useCountdown() {
     const savedActive = loadState(STORAGE_KEYS.IS_ACTIVE, false);
     const lastActive = loadState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
     const savedSound = loadState(STORAGE_KEYS.ALERT_SOUND, "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+    const savedTriggers = loadState(STORAGE_KEYS.SCHEDULED_TRIGGERS, []);
 
     let finalRemaining = savedRemaining;
     if (savedActive) {
@@ -38,6 +40,7 @@ export function useCountdown() {
     setRemainingTime(finalRemaining);
     setIsMuted(savedMuted);
     setAlertSound(savedSound);
+    setTriggers(savedTriggers);
     setIsMounted(true);
   }, []);
 
@@ -89,19 +92,35 @@ export function useCountdown() {
     persistState(STORAGE_KEYS.ALERT_SOUND, url);
   }, []);
 
-  const playAlert = useCallback(() => {
+  const addTrigger = useCallback((time: number, soundUrl: string) => {
+    setTriggers((prev) => {
+      const next = [...prev, { time, soundUrl }].sort((a, b) => b.time - a.time);
+      persistState(STORAGE_KEYS.SCHEDULED_TRIGGERS, next);
+      return next;
+    });
+  }, []);
+
+  const removeTrigger = useCallback((index: number) => {
+    setTriggers((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      persistState(STORAGE_KEYS.SCHEDULED_TRIGGERS, next);
+      return next;
+    });
+  }, []);
+
+  const playSound = useCallback((url: string) => {
     if (!isMuted && typeof window !== "undefined") {
-      const audio = new Audio(alertSound);
+      const audio = new Audio(url);
       audio.volume = 0.5;
       audio.play().catch(e => console.error("Sound play failed:", e));
     }
-  }, [isMuted, alertSound]);
+  }, [isMuted]);
 
   useEffect(() => {
     if (!isActive || remainingTime <= 0) {
       if (timerRef.current) cancelAnimationFrame(timerRef.current);
       if (remainingTime === 0 && isActive) {
-        playAlert();
+        playSound(alertSound);
       }
       return;
     }
@@ -118,6 +137,13 @@ export function useCountdown() {
       if (drift >= 0) {
         setRemainingTime((prev) => {
           const next = Math.max(0, prev - 1);
+          
+          // Check for scheduled triggers
+          const activeTrigger = triggers.find(t => t.time === next);
+          if (activeTrigger) {
+            playSound(activeTrigger.soundUrl);
+          }
+
           persistState(STORAGE_KEYS.REMAINING_TIME, next);
           persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
           if (next === 0) {
@@ -143,11 +169,10 @@ export function useCountdown() {
     return () => {
       if (timerRef.current) {
         cancelAnimationFrame(timerRef.current);
-        // Clear timeout if we used it
         clearTimeout(timerRef.current);
       }
     };
-  }, [isActive, remainingTime, playAlert]);
+  }, [isActive, remainingTime, playSound, alertSound, triggers]);
 
   if (!isMounted) return {
     initialTime: 3600,
@@ -155,12 +180,15 @@ export function useCountdown() {
     isActive: false,
     isMuted: false,
     alertSound: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
+    triggers: [],
     start: () => {},
     pause: () => {},
     reset: () => {},
     setTime: () => {},
     toggleMute: () => {},
     updateAlertSound: () => {},
+    addTrigger: () => {},
+    removeTrigger: () => {},
   };
 
   return {
@@ -169,11 +197,14 @@ export function useCountdown() {
     isMuted,
     initialTime,
     alertSound,
+    triggers,
     start,
     pause,
     reset,
     setTime,
     toggleMute,
     updateAlertSound,
+    addTrigger,
+    removeTrigger,
   };
 }

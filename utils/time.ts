@@ -34,6 +34,7 @@ export const STORAGE_KEYS = {
   EVENT_NAME: "hackathon_timer_event_name",
   LAST_ACTIVE_TIME: "hackathon_timer_last_active",
   ALERT_SOUND: "hackathon_timer_alert_sound",
+  SCHEDULED_TRIGGERS: "hackathon_timer_scheduled_triggers",
 };
 
 /**
