@@ -180,6 +180,23 @@ export const Controls: React.FC<ControlsProps> = (props) => {
     });
   };
 
+  const handleAddTrigger = React.useCallback(() => {
+    const total = getSecondsFromHHMMSS(triggerH, triggerM, triggerS);
+    if (total > props.initialTime) {
+      alert("Trigger time cannot exceed timer duration!");
+      return;
+    }
+    const sound = customSoundUrl || triggerSound;
+    if (!sound) {
+      alert("Please select or paste a sound!");
+      return;
+    }
+    if (!validateAudioUrl(sound)) return;
+    props.addTrigger(total, sound);
+    setCustomSoundUrl("");
+    setIsAddingTrigger(false);
+  }, [triggerH, triggerM, triggerS, props.initialTime, customSoundUrl, triggerSound, props.addTrigger]);
+
   if (!isMounted) return null;
 
   const showPanel = isHovered || isSettingsOpen;
@@ -306,261 +323,234 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                 backgroundColor: 'rgba(10, 10, 10, 0.95)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '40px',
-                padding: '48px',
                 width: '100%',
                 maxWidth: '950px',
                 boxShadow: '0 100px 200px -50px rgba(0, 0, 0, 1)',
-                maxHeight: '90vh',
-                overflowY: 'auto'
+                maxHeight: '85vh',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden' // CLIPS THE SCROLLBAR
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '48px' }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
-                  <h2 style={{ color: '#fff', fontSize: '32px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px' }}>Settings</h2>
-                  {props.isActive && (
-                    <div style={{ color: '#FF3B30', fontFamily: 'var(--font-orbitron), monospace', fontSize: '18px', fontWeight: '900', letterSpacing: '1px' }}>
-                      {formatTime(props.remainingTime).hh}:{formatTime(props.remainingTime).mm}:{formatTime(props.remainingTime).ss}
-                    </div>
-                  )}
-                </div>
-                <button onClick={() => setIsSettingsOpen(false)} style={{ width: '48px', height: '48px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
-                {/* Column 1: Presets & Custom Node */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '8px' }}>Presets</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {presets.map((p, i) => (
-                        <button
-                          key={i}
-                          onClick={() => { props.setTime(p.seconds); setIsSettingsOpen(false); }}
-                          style={{ padding: '20px', textAlign: 'left', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '20px', color: '#fff', cursor: 'pointer', transition: 'all 0.2s' }}
-                        >
-                          <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>{p.name}</div>
-                          <div style={{ fontSize: '18px', fontWeight: '900', fontFamily: 'monospace', marginTop: '4px' }}>
-                            {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+              {/* Inner Scrollable Content */}
+              <div style={{ 
+                flex: 1, 
+                overflowY: 'auto', 
+                padding: '48px',
+                // Custom scrollbar classes for this container
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
+              }} className="custom-scrollbar">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '48px' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
+                    <h2 style={{ color: '#fff', fontSize: '32px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-1px' }}>Settings</h2>
+                    {props.isActive && (
+                      <div style={{ color: '#FF3B30', fontFamily: 'var(--font-orbitron), monospace', fontSize: '18px', fontWeight: '900', letterSpacing: '1px' }}>
+                        {formatTime(props.remainingTime).hh}:{formatTime(props.remainingTime).mm}:{formatTime(props.remainingTime).ss}
+                      </div>
+                    )}
                   </div>
+                  <button onClick={() => setIsSettingsOpen(false)} style={{ width: '48px', height: '48px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: 'none', borderRadius: '50%', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <X size={24} />
+                  </button>
+                </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Custom Timer</h3>
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                      <TimePickerUnit label="HH" value={inputH} max={99} onChange={setInputH} />
-                      <TimePickerUnit label="MM" value={inputM} max={59} onChange={setInputM} />
-                      <TimePickerUnit label="SS" value={inputS} max={59} onChange={setInputS} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px' }}>
+                  {/* Column 1: Presets & Custom Timer */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '8px' }}>Presets</h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {presets.map((p, i) => (
+                          <button
+                            key={i}
+                            onClick={() => { props.setTime(p.seconds); setIsSettingsOpen(false); }}
+                            style={{ padding: '20px', textAlign: 'left', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '20px', color: '#fff', cursor: 'pointer', transition: 'all 0.2s' }}
+                          >
+                            <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>{p.name}</div>
+                            <div style={{ fontSize: '18px', fontWeight: '900', fontFamily: 'var(--font-orbitron), monospace', marginTop: '4px' }}>
+                              {formatTime(p.seconds).hh}:{formatTime(p.seconds).mm}:{formatTime(p.seconds).ss}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                      <input 
-                        type="text" 
-                        value={inputName}
-                        onChange={(e) => setInputName(e.target.value)}
-                        style={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}
-                        placeholder="PRESET NAME"
-                      />
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Custom Timer</h3>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <TimePickerUnit label="HH" value={inputH} max={99} onChange={setInputH} />
+                        <TimePickerUnit label="MM" value={inputM} max={59} onChange={setInputM} />
+                        <TimePickerUnit label="SS" value={inputS} max={59} onChange={setInputS} />
+                      </div>
                       <button 
-                        onClick={() => {
-                          const total = getSecondsFromHHMMSS(inputH, inputM, inputS);
-                          const newPresets = [...presets, { name: inputName, seconds: total }];
-                          setPresets(newPresets);
-                          persistState("timer_presets", newPresets);
-                        }}
-                        style={{ width: '64px', height: '64px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onClick={() => { props.setTime(getSecondsFromHHMMSS(inputH, inputM, inputS)); setIsSettingsOpen(false); }}
+                        style={{ width: '100%', height: '64px', backgroundColor: '#fff', color: '#000', borderRadius: '16px', border: 'none', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
                       >
-                        <Plus size={24} />
+                        Apply Time
                       </button>
                     </div>
-                    <button 
-                      onClick={() => { props.setTime(getSecondsFromHHMMSS(inputH, inputM, inputS)); setIsSettingsOpen(false); }}
-                      style={{ width: '100%', height: '64px', backgroundColor: '#fff', color: '#000', borderRadius: '16px', border: 'none', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
-                    >
-                      Apply Time
-                    </button>
                   </div>
-                </div>
 
-                {/* Column 2: Scheduled Alerts */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Scheduled Alerts</h3>
-                    <button 
-                      onClick={() => setIsAddingTrigger(!isAddingTrigger)}
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        backgroundColor: isAddingTrigger ? '#FF3B30' : 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: isAddingTrigger ? '#fff' : '#FF3B30',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        transform: isAddingTrigger ? 'rotate(45deg)' : 'rotate(0deg)'
-                      }}
-                    >
-                      <Plus size={18} />
-                    </button>
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    {/* Add Trigger Panel */}
-                    <AnimatePresence>
-                      {isAddingTrigger && (
-                        <motion.div 
-                          initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                          animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
-                          exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                          style={{ overflow: 'hidden' }}
+                  {/* Column 2: Scheduled Alerts */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Scheduled Alerts</h3>
+                        <button 
+                          onClick={() => setIsAddingTrigger(!isAddingTrigger)}
+                          style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: isAddingTrigger ? '#FF3B30' : 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: isAddingTrigger ? '#fff' : '#FF3B30', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s transform' }}
                         >
-                          <div style={{ padding: '24px', backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                              <TimePickerUnit label="HH" value={triggerH} max={99} onChange={setTriggerH} />
-                              <TimePickerUnit label="MM" value={triggerM} max={59} onChange={setTriggerM} />
-                              <TimePickerUnit label="SS" value={triggerS} max={59} onChange={setTriggerS} />
-                            </div>
-                            
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Select Sound</div>
-                                <label style={{ fontSize: '9px', color: '#FF3B30', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                  <Plus size={10} /> Upload File
+                          <Plus size={18} style={{ transform: isAddingTrigger ? 'rotate(45deg)' : 'none' }} />
+                        </button>
+                      </div>
+
+                      <AnimatePresence>
+                        {isAddingTrigger && (
+                          <motion.div 
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            style={{ overflow: 'hidden' }}
+                          >
+                            <div style={{ padding: '24px', backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <TimePickerUnit label="HH" value={triggerH} max={99} onChange={setTriggerH} />
+                                <TimePickerUnit label="MM" value={triggerM} max={59} onChange={setTriggerM} />
+                                <TimePickerUnit label="SS" value={triggerS} max={59} onChange={setTriggerS} />
+                              </div>
+                              
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Select Sound</div>
+                                    <label style={{ fontSize: '9px', color: '#FF3B30', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                      <Plus size={10} /> Upload File
+                                      <input 
+                                        type="file" 
+                                        accept="audio/*"
+                                        style={{ display: 'none' }}
+                                        onChange={async (e) => {
+                                          const file = e.target.files?.[0];
+                                          if (!file) return;
+                                          const formData = new FormData();
+                                          formData.append('file', file);
+                                          try {
+                                            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                                            const data = await res.json();
+                                            if (data.success) {
+                                              await fetchLocalSounds();
+                                              setTriggerSound(`/alerts/${file.name}`);
+                                              alert(`Uploaded ${file.name} successfully!`);
+                                            } else alert(data.error);
+                                          } catch (err) { alert("Upload failed"); }
+                                        }}
+                                      />
+                                    </label>
+                                  </div>
+                                  <select 
+                                    value={triggerSound}
+                                    onChange={(e) => setTriggerSound(e.target.value)}
+                                    style={{ 
+                                      width: '100%', 
+                                      backgroundColor: 'rgba(255, 255, 255, 0.05)', 
+                                      border: '1px solid rgba(255, 255, 255, 0.1)', 
+                                      borderRadius: '12px', 
+                                      padding: '12px', 
+                                      color: '#fff', 
+                                      fontSize: '12px',
+                                      colorScheme: 'dark' // Fixes the white dropdown list in most browsers
+                                    }}
+                                  >
+                                    <option value="" style={{ background: '#111' }}>Choose Sound...</option>
+                                    {localSounds.map((s, i) => (
+                                      <option key={i} value={`/alerts/${s}`} style={{ background: '#111' }}>{s}</option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                   <input 
-                                    type="file" 
-                                    accept="audio/*"
-                                    style={{ display: 'none' }}
-                                    onChange={async (e) => {
-                                      const file = e.target.files?.[0];
-                                      if (!file) return;
-                                      
-                                      const formData = new FormData();
-                                      formData.append('file', file);
-                                      
-                                      try {
-                                        const res = await fetch('/api/upload', {
-                                          method: 'POST',
-                                          body: formData
-                                        });
-                                        const data = await res.json();
-                                        if (data.success) {
-                                          await fetchLocalSounds();
-                                          setTriggerSound(`/alerts/${file.name}`);
-                                          alert(`Uploaded ${file.name} successfully!`);
-                                        } else {
-                                          alert(data.error || "Upload failed");
-                                        }
-                                      } catch (err) {
-                                        alert("Upload failed. Check console for details.");
+                                    type="text" 
+                                    value={customSoundUrl}
+                                    onChange={(e) => {
+                                      setCustomSoundUrl(e.target.value);
+                                      if (e.target.value.includes('myinstants.com') && !e.target.value.includes('.mp3')) {
+                                        alert("Tip for MyInstants: Right-click 'Download MP3' and 'Copy link address'!");
                                       }
                                     }}
+                                    placeholder="OR PASTE URL HTTPS://..."
+                                    style={{ width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '12px' }}
                                   />
-                                </label>
-                              </div>
-                              <select 
-                                value={triggerSound}
-                                onChange={(e) => setTriggerSound(e.target.value)}
-                                style={{ width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '12px' }}
-                              >
-                                <option value="">Choose Sound...</option>
-                                {localSounds.map((s, i) => (
-                                  <option key={i} value={`/alerts/${s}`}>{s}</option>
-                                ))}
-                              </select>
-                              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                <input 
-                                  type="text" 
-                                  value={customSoundUrl}
-                                  onChange={(e) => setCustomSoundUrl(e.target.value)}
-                                  placeholder="OR PASTE URL HTTPS://..."
-                                  style={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '11px' }}
-                                />
+                                  <div style={{ fontSize: '8px', color: '#444', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.5px' }}>
+                                    Direct links only. YouTube/Drive NOT supported.
+                                  </div>
+                                </div>
+
                                 <button 
-                                  onClick={() => {
-                                    const total = getSecondsFromHHMMSS(triggerH, triggerM, triggerS);
-                                    if (total > props.initialTime) {
-                                      alert("Trigger time cannot exceed timer duration!");
-                                      return;
-                                    }
-                                    const sound = customSoundUrl || triggerSound;
-                                    if (!sound) {
-                                      alert("Please select or paste a sound!");
-                                      return;
-                                    }
-                                    if (!validateAudioUrl(sound)) return;
-                                    props.addTrigger(total, sound);
-                                    setCustomSoundUrl("");
-                                    setIsAddingTrigger(false);
-                                  }}
-                                  style={{ height: '44px', padding: '0 20px', backgroundColor: '#FF3B30', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase', cursor: 'pointer' }}
+                                  onClick={handleAddTrigger}
+                                  style={{ height: '54px', width: '100%', backgroundColor: '#FF3B30', color: '#fff', border: 'none', borderRadius: '16px', fontSize: '12px', fontWeight: '900', textTransform: 'uppercase', cursor: 'pointer', letterSpacing: '1px' }}
                                 >
                                   Add Alert
                                 </button>
                               </div>
-                              <div style={{ fontSize: '8px', color: '#444', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.5px' }}>
-                                Use direct links (e.g. Discord, Mixkit). YouTube/Drive links are not supported.
-                              </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
-                    {/* Active Triggers List */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Active Alerts</div>
-                        <button 
-                          onClick={fetchLocalSounds}
-                          style={{ fontSize: '9px', color: '#FF3B30', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '900' }}
-                        >
-                          REFRESH SOUNDS
-                        </button>
-                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Active Alerts</div>
+                          <button onClick={fetchLocalSounds} style={{ fontSize: '9px', color: '#FF3B30', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '900' }}>REFRESH SOUNDS</button>
+                        </div>
 
-                      {props.triggers.length > 0 ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          {props.triggers.map((t, i) => (
-                            <div key={i} style={{ padding: '16px 20px', backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ fontSize: '16px', fontWeight: '900', fontFamily: 'monospace', color: '#fff' }}>
-                                  {formatTime(t.time).hh}:{formatTime(t.time).mm}:{formatTime(t.time).ss}
+                        {props.triggers.length > 0 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {props.triggers.map((t, i) => (
+                              <div key={i} style={{ padding: '16px 20px', backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <div style={{ fontSize: '16px', fontWeight: '900', fontFamily: 'var(--font-orbitron), monospace', color: '#fff' }}>
+                                    {formatTime(t.time).hh}:{formatTime(t.time).mm}:{formatTime(t.time).ss}
+                                  </div>
+                                  <div style={{ fontSize: '9px', color: '#666', wordBreak: 'break-all', maxWidth: '200px' }}>{t.soundUrl.split('/').pop()}</div>
                                 </div>
-                                <div style={{ fontSize: '9px', color: '#666', wordBreak: 'break-all', maxWidth: '200px' }}>{t.soundUrl.split('/').pop()}</div>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                  <button onClick={() => testSound(t.soundUrl)} style={{ backgroundColor: 'transparent', border: 'none', color: '#FF3B30', cursor: 'pointer', fontWeight: '900', fontSize: '10px' }}>TEST</button>
+                                  <button onClick={() => props.removeTrigger(i)} style={{ backgroundColor: 'transparent', border: 'none', color: '#444', cursor: 'pointer' }}><X size={16} /></button>
+                                </div>
                               </div>
-                              <div style={{ display: 'flex', gap: '12px' }}>
-                                <button onClick={() => testSound(t.soundUrl)} style={{ backgroundColor: 'transparent', border: 'none', color: '#FF3B30', cursor: 'pointer', fontWeight: '900', fontSize: '10px' }}>TEST</button>
-                                <button onClick={() => props.removeTrigger(i)} style={{ backgroundColor: 'transparent', border: 'none', color: '#444', cursor: 'pointer' }}><X size={16} /></button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div style={{ padding: '32px', textAlign: 'center', border: '1px dashed rgba(255,255,255,0.05)', borderRadius: '24px' }}>
-                          <div style={{ fontSize: '10px', color: '#333', textTransform: 'uppercase', fontWeight: '900' }}>No scheduled alerts</div>
-                        </div>
-                      )}
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ padding: '32px', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '20px', color: '#444', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                            No Alerts Scheduled
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Main Finish Alert */}
-                  <div style={{ marginTop: 'auto', padding: '24px', backgroundColor: 'rgba(255, 59, 48, 0.05)', borderRadius: '24px', border: '1px solid rgba(255, 59, 48, 0.1)' }}>
-                    <div style={{ fontSize: '9px', color: '#FF3B30', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px', marginBottom: '8px' }}>Final Finish Alert</div>
-                    <select 
-                      value={props.alertSound}
-                      onChange={(e) => props.updateAlertSound(e.target.value)}
-                      style={{ width: '100%', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '11px', fontWeight: 'bold' }}
-                    >
-                      {localSounds.map((s, i) => (
-                        <option key={i} value={`/alerts/${s}`}>{s}</option>
-                      ))}
-                    </select>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Final Finish Alert</h3>
+                      <select 
+                        value={props.alertSound}
+                        onChange={(e) => props.updateAlertSound(e.target.value)}
+                        style={{ 
+                          width: '100%', 
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)', 
+                          border: '1px solid rgba(255, 255, 255, 0.1)', 
+                          borderRadius: '12px', 
+                          padding: '12px', 
+                          color: '#fff', 
+                          fontSize: '12px',
+                          colorScheme: 'dark'
+                        }}
+                      >
+                        {localSounds.map((s, i) => (
+                          <option key={i} value={`/alerts/${s}`} style={{ background: '#111' }}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
