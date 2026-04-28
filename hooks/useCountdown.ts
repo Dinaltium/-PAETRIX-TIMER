@@ -15,6 +15,7 @@ export function useCountdown() {
   const [remainingTime, setRemainingTime] = useState<number>(3600);
   const [isActive, setIsActive] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [alertSound, setAlertSound] = useState<string>("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
   const [isMounted, setIsMounted] = useState(false);
 
   // Initialize state from localStorage after mount
@@ -24,6 +25,7 @@ export function useCountdown() {
     const savedMuted = loadState(STORAGE_KEYS.IS_MUTED, false);
     const savedActive = loadState(STORAGE_KEYS.IS_ACTIVE, false);
     const lastActive = loadState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
+    const savedSound = loadState(STORAGE_KEYS.ALERT_SOUND, "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
 
     let finalRemaining = savedRemaining;
     if (savedActive) {
@@ -35,6 +37,7 @@ export function useCountdown() {
     setInitialTime(savedInitial);
     setRemainingTime(finalRemaining);
     setIsMuted(savedMuted);
+    setAlertSound(savedSound);
     setIsMounted(true);
   }, []);
 
@@ -81,13 +84,18 @@ export function useCountdown() {
     });
   }, []);
 
+  const updateAlertSound = useCallback((url: string) => {
+    setAlertSound(url);
+    persistState(STORAGE_KEYS.ALERT_SOUND, url);
+  }, []);
+
   const playAlert = useCallback(() => {
     if (!isMuted && typeof window !== "undefined") {
-      const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+      const audio = new Audio(alertSound);
       audio.volume = 0.5;
       audio.play().catch(e => console.error("Sound play failed:", e));
     }
-  }, [isMuted]);
+  }, [isMuted, alertSound]);
 
   useEffect(() => {
     if (!isActive || remainingTime <= 0) {
@@ -146,11 +154,13 @@ export function useCountdown() {
     remainingTime: 3600,
     isActive: false,
     isMuted: false,
+    alertSound: "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
     start: () => {},
     pause: () => {},
     reset: () => {},
     setTime: () => {},
     toggleMute: () => {},
+    updateAlertSound: () => {},
   };
 
   return {
@@ -158,10 +168,12 @@ export function useCountdown() {
     isActive,
     isMuted,
     initialTime,
+    alertSound,
     start,
     pause,
     reset,
     setTime,
     toggleMute,
+    updateAlertSound,
   };
 }

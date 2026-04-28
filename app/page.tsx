@@ -26,11 +26,13 @@ export default function Home() {
     isActive,
     isMuted,
     initialTime,
+    alertSound,
     start,
     pause,
     reset,
     setTime,
     toggleMute,
+    updateAlertSound,
   } = useCountdown();
 
   useEffect(() => {
@@ -184,11 +186,13 @@ export default function Home() {
         isMuted={isMuted}
         remainingTime={remainingTime}
         initialTime={initialTime}
+        alertSound={alertSound}
         start={start}
         pause={pause}
         reset={reset}
         setTime={setTime}
         toggleMute={toggleMute}
+        updateAlertSound={updateAlertSound}
       />
 
       {/* Aesthetic Border Accents */}
