@@ -20,6 +20,7 @@ const inter = Inter({
 });
 
 export default function Home() {
+  const [isMounted, setIsMounted] = React.useState(false);
   const {
     remainingTime,
     isActive,
@@ -32,8 +33,13 @@ export default function Home() {
     toggleMute,
   } = useCountdown();
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Handle keyboard shortcuts
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!isMounted) return;
     switch(e.key.toLowerCase()) {
       case " ":
         e.preventDefault();
@@ -53,7 +59,7 @@ export default function Home() {
         toggleMute();
         break;
     }
-  }, [isActive, start, pause, reset, toggleMute]);
+  }, [isActive, start, pause, reset, toggleMute, isMounted]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -62,6 +68,7 @@ export default function Home() {
 
   // Handle confetti and sound when finished
   useEffect(() => {
+    if (!isMounted) return;
     if (remainingTime === 0 && !isActive && initialTime > 0) {
       // Trigger confetti
       confetti({
@@ -73,14 +80,14 @@ export default function Home() {
 
       // Optional sound trigger (if not muted)
       if (!isMuted) {
-        // You could play a sound here if an asset was available
         console.log("BOOM! Time is up.");
       }
     }
-  }, [remainingTime, isActive, initialTime, isMuted]);
+  }, [remainingTime, isActive, initialTime, isMuted, isMounted]);
 
   // Prevent screen sleep (Wake Lock API)
   useEffect(() => {
+    if (!isMounted) return;
     let wakeLock: any = null;
     const requestWakeLock = async () => {
       try {
@@ -99,7 +106,15 @@ export default function Home() {
     return () => {
       if (wakeLock) wakeLock.release();
     };
-  }, [isActive]);
+  }, [isActive, isMounted]);
+
+  if (!isMounted) {
+    return (
+      <main className={`${orbitron.variable} ${inter.variable} font-sans min-h-screen bg-black flex items-center justify-center`}>
+        <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+      </main>
+    );
+  }
 
   return (
     <main className={`${orbitron.variable} ${inter.variable} font-sans min-h-screen bg-black overflow-hidden flex flex-col items-center justify-center`}>

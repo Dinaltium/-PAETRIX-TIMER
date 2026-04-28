@@ -110,14 +110,19 @@ export const Controls: React.FC<ControlsProps> = ({
   const [isVisible, setIsVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [presets, setPresets] = useState<{name: string, seconds: number}[]>(() => 
-    loadState("timer_presets", [
+  const [presets, setPresets] = useState<{name: string, seconds: number}[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const savedPresets = loadState("timer_presets", [
       { name: "Hacking (24h)", seconds: 24 * 3600 },
       { name: "Final Stretch (1h)", seconds: 3600 },
       { name: "Demo (5m)", seconds: 300 },
       { name: "Quick Break (15m)", seconds: 15 * 60 },
-    ])
-  );
+    ]);
+    setPresets(savedPresets);
+    setIsMounted(true);
+  }, []);
 
   const { h, m, s } = formatTime(initialTime);
   const [inputH, setInputH] = useState(h);

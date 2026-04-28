@@ -11,18 +11,23 @@ export interface CountdownState {
 }
 
 export function useCountdown() {
-  const [remainingTime, setRemainingTime] = useState<number>(() =>
-    loadState(STORAGE_KEYS.REMAINING_TIME, 3600)
-  );
-  const [isActive, setIsActive] = useState<boolean>(() =>
-    loadState(STORAGE_KEYS.IS_ACTIVE, false)
-  );
-  const [isMuted, setIsMuted] = useState<boolean>(() =>
-    loadState(STORAGE_KEYS.IS_MUTED, false)
-  );
-  const [initialTime, setInitialTime] = useState<number>(() =>
-    loadState(STORAGE_KEYS.INITIAL_TIME, 3600)
-  );
+  const [initialTime, setInitialTime] = useState<number>(3600);
+  const [remainingTime, setRemainingTime] = useState<number>(3600);
+  const [isActive, setIsActive] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Initialize state from localStorage after mount
+  useEffect(() => {
+    const savedInitial = loadState(STORAGE_KEYS.INITIAL_TIME, 3600);
+    const savedRemaining = loadState(STORAGE_KEYS.REMAINING_TIME, 3600);
+    const savedMuted = loadState(STORAGE_KEYS.IS_MUTED, false);
+    
+    setInitialTime(savedInitial);
+    setRemainingTime(savedRemaining);
+    setIsMuted(savedMuted);
+    setIsMounted(true);
+  }, []);
 
   const timerRef = useRef<number | null>(null);
   const expectedTimeRef = useRef<number | null>(null);
@@ -123,6 +128,18 @@ export function useCountdown() {
       }
     };
   }, [isActive, remainingTime]);
+
+  if (!isMounted) return {
+    initialTime: 3600,
+    remainingTime: 3600,
+    isActive: false,
+    isMuted: false,
+    start: () => {},
+    pause: () => {},
+    reset: () => {},
+    setTime: () => {},
+    toggleMute: () => {},
+  };
 
   return {
     remainingTime,
