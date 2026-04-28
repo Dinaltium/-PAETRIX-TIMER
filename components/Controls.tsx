@@ -151,10 +151,25 @@ export const Controls: React.FC<ControlsProps> = (props) => {
     else if (document.exitFullscreen) document.exitFullscreen();
   };
 
+  const validateAudioUrl = (url: string) => {
+    if (!url) return true;
+    const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+    const isDrive = url.includes('drive.google.com');
+    if (isYouTube || isDrive) {
+      alert("YouTube and Google Drive links are not direct audio files. Please use a direct link (ending in .mp3, .wav, etc.) or use one of the local assets.");
+      return false;
+    }
+    return true;
+  };
+
   const testSound = (url: string) => {
+    if (!validateAudioUrl(url)) return;
     const audio = new Audio(url);
     audio.volume = 0.5;
-    audio.play();
+    audio.play().catch(e => {
+      console.error("Playback failed:", e);
+      alert("Playback failed. This URL might not be a direct audio file or is blocked by CORS.");
+    });
   };
 
   if (!isMounted) return null;
@@ -429,6 +444,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                                       alert("Please select or paste a sound!");
                                       return;
                                     }
+                                    if (!validateAudioUrl(sound)) return;
                                     props.addTrigger(total, sound);
                                     setCustomSoundUrl("");
                                     setIsAddingTrigger(false);
@@ -437,6 +453,9 @@ export const Controls: React.FC<ControlsProps> = (props) => {
                                 >
                                   Add Alert
                                 </button>
+                              </div>
+                              <div style={{ fontSize: '8px', color: '#444', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '0.5px' }}>
+                                Use direct links (e.g. Discord, Mixkit). YouTube/Drive links are not supported.
                               </div>
                             </div>
                           </div>
