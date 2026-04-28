@@ -26,7 +26,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
           exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={cn(
-            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-[0.8] tracking-tighter tabular-nums select-none",
+            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-[0.8] tracking-normal tabular-nums select-none",
             color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_80px_rgba(255,59,48,0.5)]"
           )}
         >
@@ -34,7 +34,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
         </motion.div>
       </div>
       {label && (
-        <span className="text-xs md:text-sm uppercase tracking-[0.4em] text-neutral-500 font-bold mt-4">
+        <span className="text-xs md:text-sm uppercase tracking-[0.4em] text-neutral-500 font-bold mt-12">
           {label}
         </span>
       )}
@@ -80,7 +80,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
       <motion.div
         animate={urgency ? "urgent" : "normal"}
         variants={urgencyVariants}
-        className="flex items-center justify-center gap-6 md:gap-12 lg:gap-16"
+        className="flex items-center justify-center gap-12 md:gap-20 lg:gap-32"
       >
         <AnimatePresence mode="popLayout">
           {h > 0 && (
