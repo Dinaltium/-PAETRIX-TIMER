@@ -36,14 +36,42 @@ const TimePickerUnit = ({
   onChange: (val: number) => void,
   max: number 
 }) => {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -1 : 1;
+      const nextValue = Math.min(max, Math.max(0, value + delta));
+      onChange(nextValue);
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [value, onChange, max]);
+
   return (
     <div className="flex flex-col gap-2 flex-1 items-center">
       <span style={{ fontSize: '10px', fontWeight: '900', color: '#666', letterSpacing: '2px', textTransform: 'uppercase' }}>{label}</span>
-      <div 
-        onWheel={(e) => {
-          const delta = e.deltaY > 0 ? -1 : 1;
-          onChange(Math.min(max, Math.max(0, value + delta)));
+      <input
+        ref={inputRef}
+        type="text"
+        value={value.toString().padStart(2, '0')}
+        onChange={(e) => {
+          const val = e.target.value.replace(/[^0-9]/g, '');
+          if (val === '') {
+            onChange(0);
+            return;
+          }
+          const num = parseInt(val, 10);
+          if (!isNaN(num)) {
+            onChange(Math.min(max, Math.max(0, num)));
+          }
         }}
+        onFocus={(e) => e.target.select()}
         style={{
           width: '100%',
           backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -51,16 +79,15 @@ const TimePickerUnit = ({
           borderRadius: '20px',
           padding: '24px 12px',
           color: '#fff',
-          fontFamily: 'monospace',
+          fontFamily: 'Orbitron, monospace',
           fontSize: '48px',
           fontWeight: '900',
           textAlign: 'center',
           cursor: 'ns-resize',
-          userSelect: 'none'
+          outline: 'none',
+          transition: 'all 0.2s'
         }}
-      >
-        {value.toString().padStart(2, '0')}
-      </div>
+      />
     </div>
   );
 };
