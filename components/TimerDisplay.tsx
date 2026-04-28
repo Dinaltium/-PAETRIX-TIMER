@@ -18,7 +18,7 @@ interface TimerDisplayProps {
 const Digit = ({ value, color = "white", label }: { value: string; color?: "white" | "red"; label?: string }) => {
   return (
     <div className="flex flex-col items-center">
-      <div className="relative py-8 md:py-12 overflow-visible">
+      <div className="relative py-4 md:py-8 overflow-visible">
         <motion.div
           key={value}
           initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
@@ -34,7 +34,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
         </motion.div>
       </div>
       {label && (
-        <span className="text-xs md:text-sm uppercase tracking-normal text-neutral-500 font-bold mt-[-1rem]">
+        <span className="text-[1.5vw] uppercase tracking-normal text-neutral-500 font-bold mt-[-1vw]">
           {label}
         </span>
       )}
@@ -53,7 +53,7 @@ const Separator = ({ color = "red" }: { color?: "white" | "red" }) => (
 
 export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isActive }) => {
   const { h, m, s, hh, mm, ss } = formatTime(remainingTime);
-  const [urgency, setUrgency] = useState(0); // 0 to 1
+  const [urgency, setUrgency] = useState(0);
 
   useEffect(() => {
     if (remainingTime <= 10 && remainingTime > 0 && isActive) {
@@ -63,12 +63,11 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
     }
   }, [remainingTime, isActive]);
 
-  // Final 10 seconds urgency animation
   const urgencyVariants = {
     normal: { scale: 1, filter: "blur(0px)" },
     urgent: { 
       scale: [1, 1.05, 1],
-      transition: { duration: 0.5, repeat: Infinity, ease: "easeInOut" as const }
+      transition: { duration: 0.5, repeat: Infinity, ease: "easeInOut" }
     }
   };
 
@@ -117,7 +116,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
             layout
             className={cn(
               "flex items-center justify-center",
-              isOnlySeconds && "scale-150"
+              isOnlySeconds && "scale-125"
             )}
           >
             <Digit 
@@ -128,15 +127,6 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
           </motion.div>
         </AnimatePresence>
       </motion.div>
-
-      {/* Glow Effect Layer */}
-      {urgency > 0 && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.4 }}
-          className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,59,48,0.15)_0%,transparent_70%)] pointer-events-none"
-        />
-      )}
 
       {/* Finished State Overlay */}
       <AnimatePresence>
