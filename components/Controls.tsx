@@ -166,9 +166,9 @@ export const Controls: React.FC<ControlsProps> = ({
 
   return (
     <>
-      {/* GLOBAL HOVER TRIGGER (Always present, pointer-events only on itself) */}
+      {/* GLOBAL HOVER TRIGGER (Minimal height to prevent blocking clicks) */}
       <div 
-        className="fixed bottom-0 left-0 right-0 h-32 z-[90] pointer-events-auto"
+        className="fixed bottom-0 left-0 right-0 h-10 z-[90] pointer-events-auto"
         onMouseEnter={() => setIsVisible(true)}
       />
 
@@ -176,7 +176,7 @@ export const Controls: React.FC<ControlsProps> = ({
         className="fixed bottom-0 left-0 right-0 z-[100] pointer-events-none flex flex-col items-center"
         onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
       >
-        <div className="relative flex flex-col items-center justify-end pb-16 w-full h-48">
+        <div className="relative flex flex-col items-center justify-end pb-20 w-full h-48">
           <AnimatePresence>
             {isVisible && (
               <motion.div

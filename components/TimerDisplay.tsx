@@ -26,8 +26,8 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
           exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={cn(
-            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-[0.8] tracking-tighter tabular-nums select-none",
-            color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_80px_rgba(255,59,48,0.5)]"
+            "text-[18vw] md:text-[22vw] font-black leading-[0.7] tracking-tighter tabular-nums select-none",
+            color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_8vw_rgba(255,59,48,0.5)]"
           )}
         >
           {value}
@@ -44,7 +44,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
 
 const Separator = ({ color = "red" }: { color?: "white" | "red" }) => (
   <div className={cn(
-    "text-[6rem] md:text-[10rem] lg:text-[14rem] font-thin opacity-20 mt-[-2rem] select-none",
+    "text-[12vw] md:text-[14vw] font-thin opacity-20 mt-[-4vw] select-none",
     color === "white" ? "text-white" : "text-[#FF3B30]"
   )}>
     :
@@ -151,10 +151,10 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
               animate={{ scale: 1, opacity: 1 }}
               className="text-center"
             >
-              <h2 className="text-[10rem] md:text-[15rem] font-black text-white tracking-tighter leading-none">
+              <h2 className="text-[10vw] md:text-[15vw] font-black text-white tracking-tighter leading-none">
                 TIME UP
               </h2>
-              <p className="text-xl md:text-2xl text-neutral-400 uppercase tracking-[1em] mt-4">
+              <p className="text-[2vw] md:text-[1.5vw] text-neutral-400 uppercase tracking-[1em] mt-[2vw]">
                 Hackathon Concluded
               </p>
             </motion.div>
