@@ -163,17 +163,21 @@ export const Controls: React.FC<ControlsProps> = ({
 
   return (
     <div 
-      className="fixed bottom-0 left-0 right-0 z-50 p-8 flex justify-center group"
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
+      className="fixed bottom-0 left-0 right-0 z-50 h-40 flex flex-col items-center justify-end pb-12 group pointer-events-none"
     >
+      <div 
+        className="absolute inset-0 pointer-events-auto"
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
+      />
+      
       <AnimatePresence>
         {isVisible && (
           <motion.div
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
-            className="bg-neutral-900/90 backdrop-blur-2xl border border-neutral-800/50 rounded-2xl p-4 flex items-center gap-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+            className="pointer-events-auto bg-neutral-900/90 backdrop-blur-2xl border border-neutral-800/50 rounded-2xl p-4 flex items-center gap-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
           >
             <div className="flex items-center gap-2">
               {!isActive ? (
