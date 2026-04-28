@@ -26,7 +26,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
           exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={cn(
-            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-[0.8] tracking-normal tabular-nums select-none",
+            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-[0.8] tracking-tighter tabular-nums select-none",
             color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_80px_rgba(255,59,48,0.5)]"
           )}
         >
@@ -34,7 +34,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
         </motion.div>
       </div>
       {label && (
-        <span className="text-xs md:text-sm uppercase tracking-[0.4em] text-neutral-500 font-bold mt-12">
+        <span className="text-[10px] md:text-xs uppercase tracking-[0.6em] text-neutral-500 font-black mt-4 md:mt-8 block w-full text-center">
           {label}
         </span>
       )}
@@ -80,7 +80,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
       <motion.div
         animate={urgency ? "urgent" : "normal"}
         variants={urgencyVariants}
-        className="flex items-center justify-center gap-12 md:gap-20 lg:gap-32"
+        className="flex items-center justify-center gap-6 md:gap-12 lg:gap-16"
       >
         <AnimatePresence mode="popLayout">
           {h > 0 && (
@@ -92,7 +92,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="flex items-center gap-4 md:gap-8 lg:gap-12"
             >
-              <Digit value={hh} color="white" label="HOURS" />
+              <Digit value={hh} color="white" label="Hours" />
               <Separator color="white" />
             </motion.div>
           )}
@@ -106,7 +106,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
               <Digit 
                 value={mm} 
                 color={h === 0 ? "white" : "red"} 
-                label="MINS" 
+                label="Minutes"
               />
               <Separator color={h === 0 ? "white" : "red"} />
             </motion.div>
@@ -123,7 +123,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
             <Digit 
               value={ss} 
               color={isOnlySeconds ? "white" : "red"} 
-              label="SECS"
+              label="Seconds"
             />
           </motion.div>
         </AnimatePresence>
