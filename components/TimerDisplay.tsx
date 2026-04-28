@@ -26,9 +26,10 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
           exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={cn(
-            "text-[8rem] md:text-[12rem] lg:text-[18rem] font-black leading-none tracking-tighter tabular-nums select-none text-center w-full",
+            "text-[8rem] md:text-[12rem] lg:text-[18rem] font-black leading-none tracking-normal tabular-nums select-none text-center w-full",
             color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_120px_rgba(255,59,48,0.6)]"
           )}
+          style={{ fontFamily: 'var(--font-orbitron), sans-serif' }}
         >
           {value}
         </motion.div>
@@ -142,7 +143,10 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
               animate={{ scale: 1, opacity: 1 }}
               className="text-center"
             >
-              <h2 className="text-[10rem] md:text-[15rem] font-black text-white tracking-tighter leading-none">
+              <h2 
+                className="text-[10rem] md:text-[15rem] font-black text-white tracking-tighter leading-none"
+                style={{ fontFamily: 'var(--font-orbitron), sans-serif' }}
+              >
                 TIME UP
               </h2>
               <p className="text-xl md:text-2xl text-neutral-400 uppercase tracking-[1em] mt-4">
