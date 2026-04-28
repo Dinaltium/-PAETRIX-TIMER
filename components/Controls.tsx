@@ -80,6 +80,7 @@ export const Controls: React.FC<ControlsProps> = (props) => {
   const [triggerM, setTriggerM] = useState(0);
   const [triggerS, setTriggerS] = useState(0);
   const [triggerSound, setTriggerSound] = useState("");
+  const [isAddingTrigger, setIsAddingTrigger] = useState(false);
 
   const fetchLocalSounds = async () => {
     setIsLoadingLocal(true);
@@ -329,59 +330,92 @@ export const Controls: React.FC<ControlsProps> = (props) => {
 
                 {/* Column 2: Scheduled Alerts */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                  <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Scheduled Alerts</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <h3 style={{ fontSize: '10px', fontWeight: '900', color: '#FF3B30', textTransform: 'uppercase', letterSpacing: '3px' }}>Scheduled Alerts</h3>
+                    <button 
+                      onClick={() => setIsAddingTrigger(!isAddingTrigger)}
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        backgroundColor: isAddingTrigger ? '#FF3B30' : 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: isAddingTrigger ? '#fff' : '#FF3B30',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transform: isAddingTrigger ? 'rotate(45deg)' : 'rotate(0deg)'
+                      }}
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     {/* Add Trigger Panel */}
-                    <div style={{ padding: '24px', backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <TimePickerUnit label="HH" value={triggerH} max={99} onChange={setTriggerH} />
-                        <TimePickerUnit label="MM" value={triggerM} max={59} onChange={setTriggerM} />
-                        <TimePickerUnit label="SS" value={triggerS} max={59} onChange={setTriggerS} />
-                      </div>
-                      
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Select Sound</div>
-                        <select 
-                          value={triggerSound}
-                          onChange={(e) => setTriggerSound(e.target.value)}
-                          style={{ width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '12px' }}
+                    <AnimatePresence>
+                      {isAddingTrigger && (
+                        <motion.div 
+                          initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+                          animate={{ height: 'auto', opacity: 1, marginBottom: 24 }}
+                          exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+                          style={{ overflow: 'hidden' }}
                         >
-                          <option value="">Choose Sound...</option>
-                          {localSounds.map((s, i) => (
-                            <option key={i} value={`/alerts/${s}`}>{s}</option>
-                          ))}
-                        </select>
-                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                          <input 
-                            type="text" 
-                            value={customSoundUrl}
-                            onChange={(e) => setCustomSoundUrl(e.target.value)}
-                            placeholder="OR PASTE URL HTTPS://..."
-                            style={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '11px' }}
-                          />
-                          <button 
-                            onClick={() => {
-                              const total = getSecondsFromHHMMSS(triggerH, triggerM, triggerS);
-                              if (total > props.initialTime) {
-                                alert("Trigger time cannot exceed timer duration!");
-                                return;
-                              }
-                              const sound = customSoundUrl || triggerSound;
-                              if (!sound) {
-                                alert("Please select or paste a sound!");
-                                return;
-                              }
-                              props.addTrigger(total, sound);
-                              setCustomSoundUrl("");
-                            }}
-                            style={{ height: '44px', padding: '0 20px', backgroundColor: '#FF3B30', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase', cursor: 'pointer' }}
-                          >
-                            Add Alert
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                          <div style={{ padding: '24px', backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '32px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <TimePickerUnit label="HH" value={triggerH} max={99} onChange={setTriggerH} />
+                              <TimePickerUnit label="MM" value={triggerM} max={59} onChange={setTriggerM} />
+                              <TimePickerUnit label="SS" value={triggerS} max={59} onChange={setTriggerS} />
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                              <div style={{ fontSize: '9px', color: '#666', textTransform: 'uppercase', fontWeight: '900', letterSpacing: '1px' }}>Select Sound</div>
+                              <select 
+                                value={triggerSound}
+                                onChange={(e) => setTriggerSound(e.target.value)}
+                                style={{ width: '100%', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '12px' }}
+                              >
+                                <option value="">Choose Sound...</option>
+                                {localSounds.map((s, i) => (
+                                  <option key={i} value={`/alerts/${s}`}>{s}</option>
+                                ))}
+                              </select>
+                              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                <input 
+                                  type="text" 
+                                  value={customSoundUrl}
+                                  onChange={(e) => setCustomSoundUrl(e.target.value)}
+                                  placeholder="OR PASTE URL HTTPS://..."
+                                  style={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '11px' }}
+                                />
+                                <button 
+                                  onClick={() => {
+                                    const total = getSecondsFromHHMMSS(triggerH, triggerM, triggerS);
+                                    if (total > props.initialTime) {
+                                      alert("Trigger time cannot exceed timer duration!");
+                                      return;
+                                    }
+                                    const sound = customSoundUrl || triggerSound;
+                                    if (!sound) {
+                                      alert("Please select or paste a sound!");
+                                      return;
+                                    }
+                                    props.addTrigger(total, sound);
+                                    setCustomSoundUrl("");
+                                    setIsAddingTrigger(false);
+                                  }}
+                                  style={{ height: '44px', padding: '0 20px', backgroundColor: '#FF3B30', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase', cursor: 'pointer' }}
+                                >
+                                  Add Alert
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
                     {/* Active Triggers List */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
