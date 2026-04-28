@@ -107,6 +107,7 @@ export const Controls: React.FC<ControlsProps> = ({
   setTime,
   toggleMute,
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [presets, setPresets] = useState<{name: string, seconds: number}[]>([]);
@@ -163,71 +164,74 @@ export const Controls: React.FC<ControlsProps> = ({
   };
 
   return (
-    <motion.div 
-      initial="initial"
-      whileHover="hover"
-      animate={isSettingsOpen ? "hover" : "initial"}
-      className="fixed bottom-0 left-0 right-0 z-[100] h-64 flex flex-col items-center justify-end pointer-events-none"
-    >
+    <div className="fixed bottom-0 left-0 right-0 z-[100] h-64 flex flex-col items-center justify-end pointer-events-none pb-12">
       {/* Invisible Trigger Zone */}
-      <div className="absolute inset-0 pointer-events-auto" />
+      <div 
+        className="absolute inset-0 pointer-events-auto"
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
+      />
 
-      <motion.div
-        variants={{
-          initial: { y: 250, opacity: 0, scale: 0.9 },
-          hover: { y: -40, opacity: 1, scale: 1 }
-        }}
-        transition={{ type: "spring", stiffness: 400, damping: 35 }}
-        className="pointer-events-auto bg-neutral-900/95 backdrop-blur-3xl border border-neutral-800 rounded-[2.5rem] p-8 flex items-center gap-12 shadow-[0_40px_100px_rgba(0,0,0,0.8)] mb-4"
-      >
-        <div className="flex items-center gap-6">
-          {!isActive ? (
-            <button 
-              onClick={start}
-              className="p-8 bg-white text-black rounded-full hover:bg-neutral-200 transition-all hover:scale-110 active:scale-90 shadow-2xl"
-            >
-              <Play size={40} fill="currentColor" />
-            </button>
-          ) : (
-            <button 
-              onClick={pause}
-              className="p-8 bg-neutral-800 text-white rounded-full hover:bg-neutral-700 transition-all hover:scale-110 active:scale-90 border border-neutral-700"
-            >
-              <Pause size={40} fill="currentColor" />
-            </button>
-          )}
-          <button 
-            onClick={reset}
-            className="p-8 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all group/reset"
-            title="Reset Timer"
+      <AnimatePresence>
+        {(isVisible || isSettingsOpen) && (
+          <motion.div
+            initial={{ y: 100, opacity: 0, scale: 0.9 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 100, opacity: 0, scale: 0.9 }}
+            className="pointer-events-auto bg-neutral-900/95 backdrop-blur-3xl border border-neutral-800/50 rounded-[3rem] px-10 py-6 flex items-center gap-12 shadow-[0_40px_100px_rgba(0,0,0,0.8)] w-max mx-auto"
           >
-            <RotateCcw size={40} className="group-active/reset:rotate-[-180deg] transition-transform duration-500" />
-          </button>
-        </div>
+            {/* Action Group */}
+            <div className="flex items-center gap-6">
+              {!isActive ? (
+                <button 
+                  onClick={start}
+                  className="w-20 h-20 flex items-center justify-center bg-white text-black rounded-full hover:bg-neutral-200 transition-all hover:scale-110 active:scale-90 shadow-2xl"
+                >
+                  <Play size={32} fill="currentColor" className="ml-1" />
+                </button>
+              ) : (
+                <button 
+                  onClick={pause}
+                  className="w-20 h-20 flex items-center justify-center bg-neutral-800 text-white rounded-full hover:bg-neutral-700 transition-all hover:scale-110 active:scale-90 border border-neutral-700"
+                >
+                  <Pause size={32} fill="currentColor" />
+                </button>
+              )}
+              <button 
+                onClick={reset}
+                className="w-16 h-16 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all group/reset"
+              >
+                <RotateCcw size={28} className="group-active/reset:rotate-[-180deg] transition-transform duration-500" />
+              </button>
+            </div>
 
-        <div className="h-16 w-[1px] bg-neutral-800" />
+            {/* Separator */}
+            <div className="h-12 w-[1px] bg-neutral-800" />
 
-        <div className="flex items-center gap-6">
-          <button 
-            onClick={toggleMute}
-            className="p-8 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all hover:scale-110"
-          >
-            {isMuted ? <VolumeX size={40} /> : <Volume2 size={40} />}
-          </button>
-          <button 
-            onClick={toggleFullscreen}
-            className="p-8 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all hover:scale-110"
-          >
-            {isFullscreen ? <Minimize size={40} /> : <Maximize size={40} />}
-          </button>
-          <button 
-            onClick={() => setIsSettingsOpen(true)}
-            className="p-8 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all border border-red-600/20 hover:scale-110 shadow-lg shadow-red-600/10"
-          >
-            <Settings size={40} />
-          </button>
-        </div>
-      </motion.div>
+            {/* Utility Group */}
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={toggleMute}
+                className="w-16 h-16 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all"
+              >
+                {isMuted ? <VolumeX size={28} /> : <Volume2 size={28} />}
+              </button>
+              <button 
+                onClick={toggleFullscreen}
+                className="w-16 h-16 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-all"
+              >
+                {isFullscreen ? <Minimize size={28} /> : <Maximize size={28} />}
+              </button>
+              <button 
+                onClick={() => setIsSettingsOpen(true)}
+                className="w-20 h-16 flex items-center justify-center bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all border border-red-600/20 shadow-lg shadow-red-600/10"
+              >
+                <Settings size={28} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isSettingsOpen && (
@@ -235,7 +239,7 @@ export const Controls: React.FC<ControlsProps> = ({
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="pointer-events-auto absolute bottom-40 bg-neutral-900 border border-neutral-800 rounded-[3rem] p-10 w-[550px] shadow-[0_32px_128px_-12px_rgba(0,0,0,0.9)] backdrop-blur-3xl"
+            className="pointer-events-auto absolute bottom-44 bg-neutral-900 border border-neutral-800 rounded-[3rem] p-12 w-[550px] shadow-[0_32px_128px_-12px_rgba(0,0,0,0.9)] backdrop-blur-3xl"
           >
             <div className="flex items-center justify-between mb-8">
               <div>
