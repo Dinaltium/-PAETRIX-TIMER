@@ -124,6 +124,22 @@ export const Controls: React.FC<ControlsProps> = ({
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      const threshold = 160; // Distance from bottom
+      const isNearBottom = window.innerHeight - e.clientY < threshold;
+      
+      if (isNearBottom) {
+        setIsVisible(true);
+      } else if (!isSettingsOpen) {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
+  }, [isSettingsOpen]);
+
   const { h, m, s } = formatTime(initialTime);
   const [inputH, setInputH] = useState(h);
   const [inputM, setInputM] = useState(m);
@@ -165,12 +181,6 @@ export const Controls: React.FC<ControlsProps> = ({
     <div 
       className="fixed bottom-0 left-0 right-0 z-50 h-40 flex flex-col items-center justify-end pb-12 group pointer-events-none"
     >
-      <div 
-        className="absolute inset-0 pointer-events-auto"
-        onMouseEnter={() => setIsVisible(true)}
-        onMouseLeave={() => !isSettingsOpen && setIsVisible(false)}
-      />
-      
       <AnimatePresence>
         {isVisible && (
           <motion.div
