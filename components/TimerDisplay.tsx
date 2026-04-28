@@ -18,7 +18,7 @@ interface TimerDisplayProps {
 const Digit = ({ value, color = "white", label }: { value: string; color?: "white" | "red"; label?: string }) => {
   return (
     <div className="flex flex-col items-center">
-      <div className="relative py-8 md:py-12 overflow-visible">
+      <div className="relative py-12 md:py-20 overflow-visible">
         <motion.div
           key={value}
           initial={{ y: 40, opacity: 0, filter: "blur(10px)" }}
@@ -26,7 +26,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
           exit={{ y: -40, opacity: 0, filter: "blur(10px)" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={cn(
-            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-[0.8] tracking-tighter tabular-nums select-none",
+            "text-[10rem] md:text-[15rem] lg:text-[20rem] font-black leading-none tracking-tighter tabular-nums select-none",
             color === "white" ? "text-white" : "text-[#FF3B30] drop-shadow-[0_0_80px_rgba(255,59,48,0.5)]"
           )}
         >
@@ -34,7 +34,7 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
         </motion.div>
       </div>
       {label && (
-        <span className="text-[10px] md:text-xs uppercase tracking-[0.6em] text-neutral-500 font-black mt-4 md:mt-8 block w-full text-center">
+        <span className="text-[10px] md:text-xs uppercase tracking-[0.6em] text-neutral-500 font-black mt-8 md:mt-12 block w-full text-center">
           {label}
         </span>
       )}
