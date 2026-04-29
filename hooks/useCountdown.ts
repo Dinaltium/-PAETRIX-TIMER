@@ -25,30 +25,36 @@ export function useCountdown() {
     const savedInitial = loadState(STORAGE_KEYS.INITIAL_TIME, 3600);
     const savedMuted = loadState(STORAGE_KEYS.IS_MUTED, false);
     const savedActive = loadState(STORAGE_KEYS.IS_ACTIVE, false);
-    const savedTarget = loadState("timer_target_timestamp", null);
+    const savedTarget = loadState(STORAGE_KEYS.TARGET_TIMESTAMP, null);
     const savedRemaining = loadState(STORAGE_KEYS.REMAINING_TIME, 3600);
     const savedSound = loadState(STORAGE_KEYS.ALERT_SOUND, "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
     const savedTriggers = loadState(STORAGE_KEYS.SCHEDULED_TRIGGERS, []);
 
     let finalRemaining = savedRemaining;
     let finalTarget = savedTarget;
+    let finalActive = false;
 
     if (savedActive && savedTarget) {
       const now = Date.now();
-      finalRemaining = Math.max(0, Math.ceil((savedTarget - now) / 1000));
-      if (finalRemaining === 0) {
-        setIsActive(false);
-        persistState(STORAGE_KEYS.IS_ACTIVE, false);
+      const diff = Math.ceil((savedTarget - now) / 1000);
+      if (diff > 0) {
+        finalRemaining = diff;
+        finalActive = true;
       } else {
-        setIsActive(true);
+        finalRemaining = 0;
+        finalActive = false;
+        persistState(STORAGE_KEYS.IS_ACTIVE, false);
+        persistState(STORAGE_KEYS.TARGET_TIMESTAMP, null);
       }
     } else {
-      setIsActive(false);
+      finalRemaining = savedRemaining;
+      finalActive = false;
     }
     
     setInitialTime(savedInitial);
     setRemainingTime(finalRemaining);
     setTargetTimestamp(finalTarget);
+    setIsActive(finalActive);
     setIsMuted(savedMuted);
     setAlertSound(savedSound);
     setTriggers(savedTriggers);
@@ -64,7 +70,7 @@ export function useCountdown() {
       setTargetTimestamp(target);
       setIsActive(true);
       persistState(STORAGE_KEYS.IS_ACTIVE, true);
-      persistState("timer_target_timestamp", target);
+      persistState(STORAGE_KEYS.TARGET_TIMESTAMP, target);
     }
   }, [remainingTime]);
 
@@ -72,7 +78,7 @@ export function useCountdown() {
     setIsActive(false);
     setTargetTimestamp(null);
     persistState(STORAGE_KEYS.IS_ACTIVE, false);
-    persistState("timer_target_timestamp", null);
+    persistState(STORAGE_KEYS.TARGET_TIMESTAMP, null);
     persistState(STORAGE_KEYS.REMAINING_TIME, remainingTime);
     
     if (timerRef.current) {
@@ -167,7 +173,7 @@ export function useCountdown() {
             setIsActive(false);
             setTargetTimestamp(null);
             persistState(STORAGE_KEYS.IS_ACTIVE, false);
-            persistState("timer_target_timestamp", null);
+            persistState(STORAGE_KEYS.TARGET_TIMESTAMP, null);
           }
         }
       }
