@@ -174,7 +174,7 @@ export default function Home() {
       </div>
 
       {/* Progress Bar at the bottom */}
-      <div className="fixed bottom-0 left-0 right-0 h-2 bg-neutral-900/30 z-20">
+      <div className="fixed bottom-0 left-0 right-0 h-5 bg-neutral-900/30 z-20">
         <motion.div 
           className="h-full bg-red-600 shadow-[0_-4px_15px_rgba(220,38,38,0.4)]"
           initial={{ width: "100%" }}

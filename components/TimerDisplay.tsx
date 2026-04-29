@@ -43,12 +43,9 @@ const Digit = ({ value, color = "white", label }: { value: string; color?: "whit
   );
 };
 
-const Separator = ({ color = "red" }: { color?: "white" | "red" }) => (
+const Separator = () => (
   <div 
-    className={cn(
-      "flex items-center justify-center opacity-20 select-none",
-      color === "white" ? "text-white" : "text-[#FF3B30]"
-    )}
+    className="flex items-center justify-center text-white opacity-100 select-none"
     style={{ width: '5vw', fontSize: '10rem' }}
   >
     <span style={{ marginTop: '-4rem' }}>:</span>
@@ -89,7 +86,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
           {h > 0 && (
             <React.Fragment key="hours-group">
               <Digit value={hh} color="white" label="Hours" />
-              <Separator color="white" />
+              <Separator />
             </React.Fragment>
           )}
 
@@ -100,7 +97,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime, isAct
                 color={h === 0 ? "white" : "red"} 
                 label="Minutes"
               />
-              <Separator color={h === 0 ? "white" : "red"} />
+              <Separator />
             </React.Fragment>
           )}
 
