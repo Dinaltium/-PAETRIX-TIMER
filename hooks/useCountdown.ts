@@ -18,26 +18,37 @@ export function useCountdown() {
   const [alertSound, setAlertSound] = useState<string>("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
   const [triggers, setTriggers] = useState<{time: number, soundUrl: string}[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [targetTimestamp, setTargetTimestamp] = useState<number | null>(null);
 
   // Initialize state from localStorage after mount
   useEffect(() => {
     const savedInitial = loadState(STORAGE_KEYS.INITIAL_TIME, 3600);
-    const savedRemaining = loadState(STORAGE_KEYS.REMAINING_TIME, 3600);
     const savedMuted = loadState(STORAGE_KEYS.IS_MUTED, false);
     const savedActive = loadState(STORAGE_KEYS.IS_ACTIVE, false);
-    const lastActive = loadState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
+    const savedTarget = loadState("timer_target_timestamp", null);
+    const savedRemaining = loadState(STORAGE_KEYS.REMAINING_TIME, 3600);
     const savedSound = loadState(STORAGE_KEYS.ALERT_SOUND, "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
     const savedTriggers = loadState(STORAGE_KEYS.SCHEDULED_TRIGGERS, []);
 
     let finalRemaining = savedRemaining;
-    if (savedActive) {
-      const diff = Math.floor((Date.now() - lastActive) / 1000);
-      finalRemaining = Math.max(0, savedRemaining - diff);
-      setIsActive(true);
+    let finalTarget = savedTarget;
+
+    if (savedActive && savedTarget) {
+      const now = Date.now();
+      finalRemaining = Math.max(0, Math.ceil((savedTarget - now) / 1000));
+      if (finalRemaining === 0) {
+        setIsActive(false);
+        persistState(STORAGE_KEYS.IS_ACTIVE, false);
+      } else {
+        setIsActive(true);
+      }
+    } else {
+      setIsActive(false);
     }
     
     setInitialTime(savedInitial);
     setRemainingTime(finalRemaining);
+    setTargetTimestamp(finalTarget);
     setIsMuted(savedMuted);
     setAlertSound(savedSound);
     setTriggers(savedTriggers);
@@ -49,22 +60,27 @@ export function useCountdown() {
 
   const start = useCallback(() => {
     if (remainingTime > 0) {
+      const target = Date.now() + remainingTime * 1000;
+      setTargetTimestamp(target);
       setIsActive(true);
       persistState(STORAGE_KEYS.IS_ACTIVE, true);
-      persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
+      persistState("timer_target_timestamp", target);
     }
   }, [remainingTime]);
 
   const pause = useCallback(() => {
     setIsActive(false);
+    setTargetTimestamp(null);
     persistState(STORAGE_KEYS.IS_ACTIVE, false);
-    persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
+    persistState("timer_target_timestamp", null);
+    persistState(STORAGE_KEYS.REMAINING_TIME, remainingTime);
+    
     if (timerRef.current) {
       cancelAnimationFrame(timerRef.current);
       timerRef.current = null;
     }
     expectedTimeRef.current = null;
-  }, []);
+  }, [remainingTime]);
 
   const reset = useCallback(() => {
     pause();
@@ -75,8 +91,12 @@ export function useCountdown() {
   const setTime = useCallback((seconds: number) => {
     setRemainingTime(seconds);
     setInitialTime(seconds);
+    setTargetTimestamp(null);
+    setIsActive(false);
     persistState(STORAGE_KEYS.REMAINING_TIME, seconds);
     persistState(STORAGE_KEYS.INITIAL_TIME, seconds);
+    persistState(STORAGE_KEYS.IS_ACTIVE, false);
+    persistState("timer_target_timestamp", null);
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -125,18 +145,15 @@ export function useCountdown() {
     }
 
     const tick = () => {
-      const now = performance.now();
+      const now = Date.now();
       
-      if (expectedTimeRef.current === null) {
-        expectedTimeRef.current = now + 1000;
-      }
+      if (isActive && targetTimestamp) {
+        const next = Math.max(0, Math.ceil((targetTimestamp - now) / 1000));
+        
+        if (next !== remainingTime) {
+          setRemainingTime(next);
+          persistState(STORAGE_KEYS.REMAINING_TIME, next);
 
-      const drift = now - expectedTimeRef.current;
-
-      if (drift >= 0) {
-        setRemainingTime((prev) => {
-          const next = Math.max(0, prev - 1);
-          
           // Check for scheduled triggers
           const activeTrigger = triggers.find(t => t.time === next);
           if (activeTrigger) {
@@ -148,22 +165,14 @@ export function useCountdown() {
             playSound(alertSound);
             lastPlayedRef.current = 0;
             setIsActive(false);
+            setTargetTimestamp(null);
             persistState(STORAGE_KEYS.IS_ACTIVE, false);
+            persistState("timer_target_timestamp", null);
           }
-
-          persistState(STORAGE_KEYS.REMAINING_TIME, next);
-          persistState(STORAGE_KEYS.LAST_ACTIVE_TIME, Date.now());
-          return next;
-        });
-        
-        expectedTimeRef.current += 1000;
-        const nextInterval = Math.max(0, 1000 - drift);
-        timerRef.current = window.setTimeout(() => {
-          timerRef.current = requestAnimationFrame(tick);
-        }, nextInterval) as unknown as number;
-      } else {
-        timerRef.current = requestAnimationFrame(tick);
+        }
       }
+      
+      timerRef.current = requestAnimationFrame(tick);
     };
 
     timerRef.current = requestAnimationFrame(tick);
@@ -171,10 +180,9 @@ export function useCountdown() {
     return () => {
       if (timerRef.current) {
         cancelAnimationFrame(timerRef.current);
-        clearTimeout(timerRef.current);
       }
     };
-  }, [isActive, remainingTime, playSound, alertSound, triggers]);
+  }, [isActive, targetTimestamp, playSound, alertSound, triggers]);
 
   if (!isMounted) return {
     initialTime: 3600,
